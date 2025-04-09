@@ -400,6 +400,7 @@ sub command {
 sub amc_command {
     my ( $self, $sub, @opts ) = @_;
 
+    push @opts, '--project-dir', '%PROJ';
     push @opts, '--debug', '%PROJ/debug.log' if ( $self->{debug} );
     @opts = map {
         s:%DATA:$self->{temp_dir}/data:g;
@@ -421,10 +422,11 @@ sub prepare {
         's[' . $self->{documents} . ']', '--epoch',
         946684800,                       '--n-copies',
         $self->{n_copies},               '--prefix',
-        $self->{temp_dir} . '/',         '%PROJ/' . $self->{src},
-        '--data',                        '%DATA',
+        $self->{temp_dir} . '/',         '--source',
+        '%PROJ/' . $self->{src},         '--data',
+        '%DATA',
     );
-    $self->amc_command( 'meptex', '--src', '%PROJ/calage.xy',
+    $self->amc_command( 'meptex',
         '--data', '%DATA', );
     $self->stop_clock("subject and layout");
 
@@ -435,7 +437,8 @@ sub prepare {
         $self->{tex_engine}, '--mode',
         'b',                 '--n-copies',
         $self->{n_copies},   '--data',
-        '%DATA',             '%PROJ/' . $self->{src},
+        '%DATA',             '--source',
+        '%PROJ/' . $self->{src},
     );
     $self->stop_clock("scoring strategy");
 }
@@ -454,7 +457,8 @@ sub analyse {
             946684800,           '--n-copies',
             $self->{n_copies},   '--prefix',
             '%PROJ/',            '--data',
-            '%DATA',             '%PROJ/' . $self->{src},
+            '%DATA',             '--source',
+            '%PROJ/' . $self->{src},
         );
     }
 
@@ -465,7 +469,7 @@ sub analyse {
         close(NUMS);
         $self->amc_command(
             'imprime',
-            '--sujet'         => '%PROJ/corrige.pdf',
+            '--sujet'         => '%PROJ/DOC-indiv-solution.pdf',
             '--methode'       => 'file',
             '--output'        => '%PROJ/xx-copie-%e.pdf',
             '--fich-numeros'  => $nf,
@@ -495,7 +499,7 @@ sub analyse {
             "-dBATCH"
         );
         push @cmd, "-dQUIET" if ( !$self->{debug} );
-        system( @cmd, $self->{temp_dir} . "/corrige.pdf" );
+        system( @cmd, $self->{temp_dir} . "/DOC-indiv-solution.pdf" );
 
         opendir( my $dh, $self->{temp_dir} )
           || die "can't opendir $self->{temp_dir}: $!";
@@ -898,7 +902,6 @@ sub annote {
             ? "--force-ascii"
             : "--no-force-ascii" ),
         '--n-copies',              $self->{n_copies},
-        '--subject',               '%PROJ/sujet.pdf',
         '--src',                   '%PROJ/' . $self->{src},
         '--with',                  $self->{tex_engine},
         '--filename-model',        $self->{model},
@@ -1387,7 +1390,7 @@ sub check_textest {
 
 sub check_subject {
     my ($self) = @_;
-    $self->see_file( $self->{temp_dir} . "/sujet.pdf" );
+    $self->see_file( $self->{temp_dir} . "/DOC-sujet.pdf" );
 }
 
 sub data {
