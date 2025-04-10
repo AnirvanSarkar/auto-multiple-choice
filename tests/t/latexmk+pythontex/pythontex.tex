@@ -1,0 +1,106 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}    
+\usepackage[T1]{fontenc}
+
+\usepackage[francais,bloc,completemulti]{automultiplechoice}    
+
+\usepackage{pythontex}
+
+\begin{pycode}
+import random
+import math
+
+random.seed(12345)
+indices = [0,1,2,3,4]
+
+def nouveau_vecteur():
+  random.shuffle(indices)
+  while indices[0]==0:
+    random.shuffle(indices)
+  return random.sample([1,2,3,4,5,6,7,8,9], 5)
+
+def deux_entiers():
+  return random.sample([2,3,4,5], 2)  
+
+def myf(x,y) :
+  return (2*x+y)*(x-y)
+
+\end{pycode}
+
+%--------
+% DOCUMENT
+%--------
+\begin{document}
+
+\setdefaultgroupmode{withoutreplacement}
+
+\def\AMCdecimalPoint{\raisebox{1ex}{\bf ,}}
+
+\element{questions}{
+\begin{question}{fonctionf}
+  \pyc{i,j=deux_entiers()}
+  On considère la fonction $f$ définie par $f(x,y)=(2x+y)(x-y)$.
+  
+  Calculer $f(\py{i},\py{j})$
+  
+  \begin{reponseshoriz}
+    \bonne{$\py{myf(i,j)}$}
+    \mauvaise{$\py{myf(j,i)}$}
+    \mauvaise{$\py{-myf(i,j)}$}
+    \mauvaise{$\py{-myf(j,i)}$}
+  \end{reponseshoriz}
+\end{question}
+}
+
+\element{questions}{
+\begin{question}{list}
+  \pyc{vect=nouveau_vecteur()}
+  \pyc{i=indices[0]}
+  On considère la liste python \texttt{vect = \py{vect}}.
+  Quelle est la valeur de \texttt{vect[\py{i}]} ?
+  \begin{reponseshoriz}
+    \bonne{\py{vect[i]}}
+    \mauvaise{\py{vect[indices[1]]}}
+    \mauvaise{\py{vect[indices[2]]}}
+    \mauvaise{\py{vect[indices[3]]}}
+    \mauvaise{\py{vect[indices[4]]}}
+  \end{reponseshoriz}
+\end{question}
+}
+
+\element{questions}{
+\begin{questionmultx}{racine}
+  \pyc{x=random.choice([3,5,6,7,8])}
+  \pyc{valeur=math.sqrt(x)}
+  %
+  Prenez votre calculatrice et calculez une valeur approchée de
+  $\sqrt{\py{x}}$, en arrondissant soigneusement à deux chiffres après
+  la virgule.
+  \pys{\AMCnumericChoices{!{valeur}}{digits=3,decimals=2,sign=false,approx=1}}
+\end{questionmultx}
+}
+
+\exemplaire{5}{    
+
+  \noindent{\bf QCM  \hfill TEST}
+
+  \vspace*{.5cm}
+  \begin{minipage}{.4\linewidth}
+    \centering\large\bf Devoir surveillé \end{minipage}
+  \champnom{\fbox{    
+      \begin{minipage}{.5\linewidth}
+        Nom et prénom :
+        
+        \vspace*{.5cm}\dotfill
+        \vspace*{1mm}
+      \end{minipage}
+    }}
+  
+  \vspace{5ex}
+  
+  \restituegroupe{questions}
+
+}
+
+\end{document}
