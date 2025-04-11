@@ -691,9 +691,14 @@ sub execute {
               if (/Warning: .*run twice/);
 
             # Output written on jobname.pdf (10 pages) -> output
-            # format is pdf
+            # format is pdf, and also detect build dir
 
-            $format = $1 if (/^Output written on .*\.([a-z]+) \(/);
+            if (/^Output written on (.*)\.([a-z]+) \(/){
+                my $output_base = $1;
+                my $output_ext = $2;
+                $format = $output_ext;
+                get_builddir($output_base);
+            }
 
             # Lines beginning with '!' are errors: collect them
 
