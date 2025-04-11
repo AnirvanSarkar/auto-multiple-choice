@@ -24,9 +24,5 @@ my $t = AMC::Test->new(
     dir          => __FILE__,
     tex_engine   => 'pdflatex -output-directory _build',
     perfect_copy => [3],
-                      );
-
-mkdir($t->{temp_dir} . "/_build");
-
-$t->default_process();
+)->default_process();
 

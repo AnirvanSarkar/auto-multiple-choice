@@ -276,7 +276,7 @@ sub install {
     $self->{scans} = [] if ( !$self->{scans} );
 
     for my $d (
-        qw(data cr cr/corrections cr/corrections/jpg cr/corrections/pdf scans))
+        qw(data cr cr/corrections cr/corrections/jpg cr/corrections/pdf scans _build))
     {
         mkdir( $self->{temp_dir} . "/$d" ) if ( !-d $self->{temp_dir} . "/$d" );
     }

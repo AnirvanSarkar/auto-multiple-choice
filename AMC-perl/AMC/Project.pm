@@ -115,7 +115,7 @@ sub open {
     # creates (if missing) project directory structure
 
     for my $sous ( '',
-        qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms cr/diagnostic data scans exports anonymous:
+        qw:cr cr/corrections cr/corrections/jpg cr/corrections/pdf cr/zooms cr/diagnostic data scans exports anonymous _build:
       )
     {
         my $rep = $self->{config}->get('rep_projets') . "/$proj/$sous";
