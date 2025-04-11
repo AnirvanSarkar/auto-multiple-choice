@@ -792,6 +792,13 @@ sub execute {
         }
     }
 
+    # remove config file from project tree, so that it can be kept
+    # clean when using a custom build dir.
+    my $config_file = "$jobname-config.tex";
+    if(-f $config_file && ! get_debug()) {
+        unlink $config_file;
+    }
+
 }
 
 # do_filter() converts the source file to LaTeX format, using the
