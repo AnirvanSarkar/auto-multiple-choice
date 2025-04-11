@@ -442,7 +442,7 @@ sub defaults {
 
     $self->{project_default} = {
         texsrc             => '',
-        build_dir          => './',
+        build_dir          => '.',
         data               => 'data',
         cr                 => 'cr',
         listeetudiants     => '',
