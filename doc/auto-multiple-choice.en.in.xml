@@ -62,7 +62,7 @@
     </author>
 
     <copyright>
-      <year>2008-2024</year>
+      <year>2008-2025</year>
 
       <holder>Alexis Bienvenüe</holder>
     </copyright>
@@ -1910,8 +1910,63 @@ Duration : 10 minutes.
           </callout>
         </calloutlist></para>
 
+     <sect3 id="AMCtableform">
+       <title id="AMCtableform.title">\AMCtableform</title>
+              <para><code>\AMCtableform[options]</code> is a variant of <code>\AMCform</code>
+              that displays the boxes as a multi-column table.</para>
+              <para>Declare <code>\usepackage{multicols}</code> in preamble.</para>
+      
+      <variablelist>
+        <varlistentry>
+          <term>nanswers=<replaceable>num</replaceable></term>
+            <listitem><para>gives the number of answers that are labeled in the table
+            (defaults to the maximal number of answers of the subject).</para>
+            </listitem>
+        </varlistentry>
+        
+        <varlistentry>
+          <term>ncols=<replaceable>num</replaceable></term>
+            <listitem><para>gives the number of columns to use 
+            (defaults to the largest possible number of columns).</para>
+            </listitem>
+        </varlistentry>
+        
+        <varlistentry>
+          <term>idtext=<replaceable>text</replaceable></term>
+            <listitem><para>gives a text to be inserted before each question number..</para>
+            </listitem>
+        </varlistentry>
+        
+        <varlistentry>
+          <term>idtitle=<replaceable>text</replaceable></term>
+            <listitem><para>gives a text to be used as a column title for question numbers.</para>
+            </listitem>
+        </varlistentry> 
+        
+        <varlistentry>
+          <term>headers=<replaceable>bool</replaceable></term>
+            <listitem><para>tells if the headers with boxes letters are to be
+            added at the top of the columns (defaults to true).</para>
+            </listitem>
+        </varlistentry> 
+  
+          <varlistentry>
+          <term>inside=<replaceable>bool</replaceable></term>
+            <listitem><para>tells if letters are to be written inside the boxes (defaults to false) </para>
+            </listitem>
+        </varlistentry> 
+  
+          <varlistentry>
+          <term>columnsep=<replaceable>dim</replaceable></term>
+          <term>columnseprul=<replaceable>dim</replaceable></term>
+            <listitem><para>are passed to the <code>multicols</code> environment..</para>
+            </listitem>
+        </varlistentry>   
+  
+      </variablelist>
+
       <warning>
-        <para>When one uses a separate answer sheet, letters (or digits, if
+        <para>When using a separate answer sheet, letters (or digits, if
         one uses the option <option>digits</option>, see <xref
         linkend="sec.package.options"/>) are written in the check-boxes. To
         achieve a correct detection of the checked boxes, one has to ask
@@ -1921,6 +1976,7 @@ Duration : 10 minutes.
         which that box is considered to be checked) to a value of order
         0.5.</para>
       </warning>
+      </sect3>
     </sect2>
 
     <sect2 id="latex.commands">
@@ -2344,7 +2400,7 @@ Duration : 10 minutes.
 \savebox{\correcbox}{\parbox{5cm}{\color{red}{Here a linebreak\\or\\here...}}}
        </programlisting>
 
-          <para>Call out the boxe's contents:</para>
+          <para>Call out the content box:</para>
 
           <programlisting>
 \AMCOpen{lines=4,lineheight=0.15cm, answer= \usebox{\correcbox}}{the scoring}
@@ -2352,24 +2408,15 @@ Duration : 10 minutes.
         </tip>
 
 <warning>
-  <itemizedlist>
-    <listitem>
 <para> If the answer contains a comma or the equal sign, <replaceable>text</replaceable>
  must be  bracketed by braces. </para>
-  </listitem>
-      <listitem>
-  <para>If the answer contains commands <command>\command</command> or
-  definitions <command>\def</command>, you must add <command>\protect</command>.
-  </para>
-  </listitem>
-  </itemizedlist>
 
 <programlisting>
 \FPeval\aRandomVariable{round(3+8*random,2)}
 \FPeval\aCalculateVariable{round(\aRandomVariable*9.81,2)}
 
-\AMCOpen{answer={m=\protect\qty{\aRandomVariable}{\kilo\gram},%
-P=\protect\qty{\aCalculateVariable}{\newton}}{the scoring}
+\AMCOpen{answer={m=\qty{\aRandomVariable}{\kilo\gram},%
+P=\qty{\aCalculateVariable}{\newton}}}{the scoring}
 </programlisting>
 </warning>
 
@@ -2426,24 +2473,27 @@ P=\protect\qty{\aCalculateVariable}{\newton}}{the scoring}
               boxes.</para>
             </listitem>
           </varlistentry>
-        </variablelist>
+          
+              <varlistentry>
+            <term>Treserved=<replaceable>texte</replaceable></term>
+
+            <listitem>
+              <para>a little text can be written in the marking area to
+        tell the students not to tick these boxesà.</para>
+        <para>When using separate answer sheets, the text added to each open
+        question can also be defined, as:</para>
+
+        <programlisting>\def\AMCotextGoto{\par{\bf\emph{Please write the answer on the separate answer sheet.}}}</programlisting>
+
+            </listitem>
+          </varlistentry>
+      </variablelist>
 
         <para>You can set other default values (for the whole exam) for all
         these parameters using the command <command>\AMCopenOpts</command>,
         like</para>
 
         <programlisting>\AMCopenOpts{boxframerule=2pt,boxframerulecol=red}</programlisting>
-
-        <para>Moreover, a little text can be written in the marking area to
-        tell the students not to tick these boxes, redefining the
-        <command>\AMCotextReserved</command> command, as:</para>
-
-        <programlisting>\def\AMCotextReserved{\emph{Reserved}}</programlisting>
-
-        <para>When using separate answer sheets, the text added to each open
-        question can also be defined, as:</para>
-
-        <programlisting>\def\AMCotextGoto{\par{\bf\emph{Please write the answer on the separate answer sheet.}}}</programlisting>
 
         <tip>
           <para>if the number of boxes is significant, use this tip
@@ -2492,7 +2542,7 @@ P=\protect\qty{\aCalculateVariable}{\newton}}{the scoring}
 		<sect4 id="identifier">
 			<title id="identifier.title">Identifier</title>
         <important>
-          <para>One must use a different identifier for every question. An
+          <para>Use a different identifier for every question. An
           identifier can be made of digits, letters, and simple characters
           (but do not use e.g. underscores, braces or brackets, that have a
           special meaning in LaTeX files). Don't end your question identifier
@@ -6806,9 +6856,9 @@ the bottom value, the sore is set to the bottom value.</para>
       <variablelist>
 
         <varlistentry>
-          <term>sumscore:</term>
+          <term>sumscores:</term>
           <listitem>
-            <para>we take the sum of the scores, and in the denominator the sum of the maximum scores.</para>
+            <para>we choose the sum of the scores, and in the denominator the sum of the maximum scores.</para>
           </listitem>
         </varlistentry>
 

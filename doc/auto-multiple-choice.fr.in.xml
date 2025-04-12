@@ -48,7 +48,7 @@
     </othercredit>
 
     <copyright>
-      <year>2008-2024</year>
+      <year>2008-2025</year>
 
       <holder>Alexis Bienvenüe</holder>
     </copyright>
@@ -1961,6 +1961,56 @@ Durée : 10 minutes.
           </callout>
         </calloutlist></para>
 
+      <sect3 id="AMCtableform">
+       <title id="AMCtableform.title">\AMCtableform</title>
+              <para><code>\AMCtableform[options]</code> est une variante de <code>\formulaire</code>
+      (<code>\AMCform</code> en anglais) qui affiche les cases dans un tableau multicolonnes.
+      Déclarez le paquet <code>\usepackage{multicols}</code> dans le préambule.</para>
+      
+      <variablelist>
+        <varlistentry>
+          <term>nanswers=<replaceable>num</replaceable></term>
+            <listitem><para>donne le nombre des réponses qui sont 
+           cataloguées dans le tableau ( par défaut égal au nombre maximal de réponses
+            du sujet).</para></listitem>
+        </varlistentry>
+        
+        <varlistentry>
+          <term>ncols=<replaceable>num</replaceable></term>
+            <listitem><para>donne le nombre de colonnes à afficher
+            dans le tableau (par défaut le plus grand nombre possible de colonnes).</para></listitem>
+        </varlistentry>
+        
+        <varlistentry>
+          <term>idtext=<replaceable>texte</replaceable></term>
+            <listitem><para>insère un texte avant chaque numéro de question.</para></listitem>
+        </varlistentry>
+        
+        <varlistentry>
+          <term>idtitle=<replaceable>texte</replaceable></term>
+            <listitem><para>insère un texte à chaque colonne.</para></listitem>
+        </varlistentry> 
+        
+        <varlistentry>
+          <term>headers=<replaceable>bool</replaceable></term>
+            <listitem><para>affiche (<code>true</code> par défaut) ou non les cases en en-tête
+            avec les lettres (ou chiffres) de chaque colonne.</para></listitem>
+        </varlistentry> 
+  
+          <varlistentry>
+          <term>inside=<replaceable>bool</replaceable></term>
+            <listitem><para>affiche (<code>false</code> par défaut) ou non les lettres (ou chiffres)
+            dans chaque case.</para></listitem>
+        </varlistentry> 
+  
+          <varlistentry>
+          <term>columnsep=<replaceable>dim</replaceable></term>
+          <term>columnseprul=<replaceable>dim</replaceable></term>
+            <listitem><para>les arguments du paquet <code>multicols</code>.</para></listitem>
+        </varlistentry>   
+  
+      </variablelist>
+
       <warning>
         <para>Quand on utilise une page de réponses séparée, des lettres (ou
         des chiffres, avec l'utilisation de l'option
@@ -1973,10 +2023,12 @@ Durée : 10 minutes.
         proportion de noir dans une case à partir de laquelle cette case est
         considérée comme étant cochée) à une valeur de l'ordre de 0,5.</para>
       </warning>
+        </sect3>
+  
     </sect2>
 
     <sect2 id="latex.commands">
-      <title>Description des commandes LaTeX</title>
+      <title id="latex.commands.title">Description des commandes LaTeX</title>
 
       <sect3 id="sec.package.options">
         <title id="sec.package.options.title">Options du paquet</title>
@@ -2444,19 +2496,14 @@ Durée : 10 minutes.
 	<para>Si la réponse contient une virgule ou le signe égal, il faut encadrer
 		<replaceable>texte</replaceable> par des accolades.</para>
 	</listitem>
-			<listitem>
-	<para>Si la réponse contient des commandes <command>\command</command> ou des
-	définitions <command>\def</command>, il faudra ajouter <command>\protect</command>.
-	</para>
-	</listitem>
 	</itemizedlist>
 
 <programlisting>
 \FPeval\aRandomVariable{round(3+8*random,2)}
 \FPeval\aCalculateVariable{round(\aRandomVariable*9.81,2)}
 
-\AMCOpen{answer={m=\protect\qty{\aRandomVariable}{\kilo\gram},%
-P=\protect\qty{\aCalculateVariable}{\newton}}{le barème}
+\AMCOpen{answer={m=\qty{\aRandomVariable}{\kilo\gram},%
+P=\qty{\aCalculateVariable}{\newton}}}{le barème}
 </programlisting>
 </warning>
 
@@ -2515,26 +2562,28 @@ P=\protect\qty{\aCalculateVariable}{\newton}}{le barème}
               de notation.</para>
             </listitem>
           </varlistentry>
-        </variablelist>
+  
+            <varlistentry>
+            <term>Treserved=<replaceable>texte</replaceable></term>
 
-        <para>Vous pouvez modifier la valeur par défaut (pour tout votre
-        questionnaire) de toutes ces options grâce à la commande
-        <command>\AMCopenOpts</command>, comme</para>
-
-        <programlisting>\AMCopenOpts{boxframerule=2pt,boxframerulecol=red}</programlisting>
-
-        <para>De plus, on peut ajouter un petit texte dans la zone de notation
-        pour signifier aux étudiants de ne pas cocher ces cases-là en
-        redéfinissant la commande <command>\AMCotextReserved</command> comme
-        suit :</para>
-
-        <programlisting>\def\AMCotextReserved{\emph{Reservé}}</programlisting>
-
-        <para>Dans le cas de l'utilisation d'une feuille de réponse séparée,
+            <listitem>
+              <para>petit texte dans la zone de notation
+        pour signifier aux étudiants de ne pas cocher ces cases-là.</para>
+          <para>Dans le cas de l'utilisation d'une feuille de réponse séparée,
         on peut également ajouter un petit texte à chaque question ouverte
         comme suit :</para>
 
         <programlisting>\def\AMCotextGoto{\par{\bf\emph{Répondez sur la feuille de réponses.}}}</programlisting>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+
+        <para>La commande
+        <command>\AMCopenOpts</command>,  permet de modifier la valeur par défaut (pour tout votre
+        questionnaire) de toutes ces options.</para>
+
+        <programlisting>\AMCopenOpts{boxframerule=2pt,boxframerulecol=red}</programlisting>
+
 
         <tip>
           <para>Si le nombre de cases réponses est important, utilisez
@@ -4642,8 +4691,8 @@ Tvhead={km,{},{},m,{},{},mm,{},{},$\mu$m},
               <term>Tpoint=<replaceable>text</replaceable></term>
 
               <listitem>
-                <para>donne le texte correspondant à la virgule (décimale). Il
-                peut également être modifié par
+                <para>donne le texte correspondant à la virgule ( séparateur décimal).</para>
+                <para>Il peut être modifié par 
                 <code>\def\AMCdecimalPoint{<replaceable>text</replaceable>}</code>,
                 et la valeur par défaut est <code>\raisebox{1ex}{\bf
                 .}</code>.</para>
@@ -4655,7 +4704,7 @@ Tvhead={km,{},{},m,{},{},mm,{},{},$\mu$m},
 
               <listitem>
                 <para>donne le texte affiché entre la partie mantisse et la
-                partie exposant.</para><para>Ce texte peut également être modifié par
+                partie exposant. Ce texte peut également être modifié par
                 <code>\def\AMCexponent{<replaceable>text</replaceable>}</code>,
                 et sa valeur par defaut est
                 <code>$\times10$\textasciicircum</code>.</para>
@@ -7231,7 +7280,7 @@ cette valeur est ramenée à la valeur plancher.</para>
       <variablelist>
 
         <varlistentry>
-          <term>sumscore:</term>
+          <term>sumscores:</term>
           <listitem>
             <para>on prend la somme des scores, et au dénominateur la somme des scores maximaux.</para>
           </listitem>
@@ -8018,7 +8067,7 @@ id="password.protect" linkends="password.protect.exp"/>
     <sect2 id="verbatim">
       <title><package>verbatim</package></title>
 
-      <para>Issue du <ulink
+      <para>Issu du <ulink
       url="https://project.auto-multiple-choice.net/projects/auto-multiple-choice/wiki/Verbatim_inside_questions">
       wiki</ulink>.</para>
 
