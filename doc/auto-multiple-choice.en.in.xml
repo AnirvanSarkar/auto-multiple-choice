@@ -2239,6 +2239,59 @@ Duration : 10 minutes.
         instead of <option>question</option>.</para>
 		</sect4>
 
+        <sect4 id="split.answers">
+          <title id="split.answers.title">Split answers</title>
+<para>The environment can be split.</para>
+<programlisting>
+\begin{questionmult}{R.ect}
+A standard deviation is an indicator…
+\begin{answers}[o]
+\wrong{of central tendency}
+\right{of dispersion}
+\end{answers}
+
+\begin{answers}[o]
+\right{sensitive to extreme values}
+\wrong{not very sensitive to extreme values}
+\end{answers}
+
+\begin{answers}[o]
+\right{with the same unit as the values}
+\wrong{with a different unit than the values}
+\end{answers}
+</programlisting>
+
+<warning>
+<para>In a <option>questionmult</option> with the option
+<option>completemulti</option>, each environment <option>answers</option>
+adds the final question <emphasis>None of these answers are correct</emphasis>.
+This option should therefore be removed for the first responses. See <xref endterm="sec.package.options.title"
+linkend="sec.package.options"/>.</para></warning>
+<programlisting>
+\begin{questionmult}{R.ect-b}
+A standard deviation is an indicator
+
+\emph{(regarding its objective)}
+{\AMCnoCompleteMulti
+\bad{of central tendency}
+\good{of dispersion}
+\end{answers}}
+
+\emph{(regarding its sensitivity)}
+{\AMCnoCompleteMulti\begin{answers}
+\good{sensitive to extreme values}
+\bad{not very sensitive to extreme values}
+\end{answers}}
+
+\emph{(regarding its dimension)}
+\begin{answers}
+\good{of the same unit as the values}
+\bad{of a different unit from the values
+\end{answers}
+\end{questionmult}
+  </programlisting>
+          </sect4>
+
       <sect4 id="openquestions">
         <title>Open questions</title>
 
@@ -2694,6 +2747,30 @@ There is \total{AMCquestionaff} questions.
 \end{document}
 </programlisting>
            	</sect5>
+           	
+        <sect5 id="answers.counter">
+          <title id="answers.counser.title">Answers counter</title>
+          <para>The internal counter is<code>AMC@ncase</code>.</para>
+<programlisting>
+% aafter \begin{document}
+\makeatletter
+\def\proposition{Proposition \alph{AMC@ncase} :}
+\makeatother
+% ...
+% for a question
+\begin{question}{identifiant}
+Question…
+
+\begin{reponses}
+\correctchoice{\proposition{} text…}
+\wrongchoice{\proposition{} text…}
+\wrongchoice{\proposition{} text…}
+\end{reponses}
+\end{question}
+</programlisting>
+        </sect5>
+           	
+           	
         </sect4>
 
       <sect4 id="latex.choices.multicol">
@@ -3923,11 +4000,26 @@ and write your first and last names below.
         <para>Load those commands below in the preambule (here with the
         default values).</para>
 
-        <programlisting>\makeatletter
+<programlisting>\makeatletter
 \def\AMC@NCBetud{12}
 \def\AMC@NCBpage{6}
 \def\AMC@NCBcheck{6}
-\makeatother          </programlisting>
+\makeatother 
+</programlisting>
+
+<tip><para>To start the copy number at a value other than 1 (here 141).</para>
+<programlisting>
+\makeatletter
+\AMCid@etudstart=141
+\makeatother</programlisting>
+
+<para>To change the check code value (60 by default) to 59.</para>
+<programlisting>
+\makeatletter
+\advance\AMCid@check\m@ne
+\makeatother
+</programlisting>
+</tip>
       </sect3>
     </sect2>
 
@@ -7082,10 +7174,22 @@ topics:
           </listitem>
         </itemizedlist>
       </sect3>
+  
+     <sect3 id="annotations.layers">
+       <title id="annotations.layers.title">Layer of annotations for printing on originals</title>
+      <para>To print the corrections on the original copies (<emphasis>imperatively</emphasis> 
+      sorted in ascending order alphabetical or numerical), you need to create a layer of annotations
+      that will be printed with the copies in the paper tray of the photocopier.</para>
+  <programlisting>
+gs -o Annotations_complete_only.pdf -sDEVICE=pdfwrite -dFILTERIMAGE All_students.pdf
+  </programlisting>
+     </sect3>   
+  
+  
     </sect2>
 
-    <sect2 id="preferences.defaut">
-      <title id="preferences.defaut.title">Default values edit menu</title>
+    <sect2 id="preferences.default">
+      <title id="preferences.default.title">Default values edit menu</title>
 
       <para><menuchoice>
           <guimenuitem>Edit</guimenuitem>

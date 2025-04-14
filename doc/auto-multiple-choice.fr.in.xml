@@ -2310,6 +2310,60 @@ Durée : 10 minutes.
           <option>question</option>.</para>
     </sect4>
 
+        <sect4 id="split.answers">
+          <title id="split.answers.title">Scinder les réponses</title>
+            <para>L'environnement peut être scinder.</para>
+  <programlisting>
+\begin{questionmult}{R.ect}
+  Un écart type est un indicateur…
+   \begin{reponses}[o]
+    \mauvaise{de tendance centrale}
+    \bonne{de dispersion}
+    \end{reponses}
+
+    \begin{reponses}[o]
+    \bonne{sensible aux valeurs extrêmes}
+    \mauvaise{peu sensible aux valeurs extrêmes}
+    \end{reponses}
+
+    \begin{reponses}[o]
+    \bonne{de même unité que les valeurs}
+    \mauvaise{d'unité différente des valeurs}
+    \end{reponses}
+  </programlisting>
+  
+  <warning>
+  <para>Dans une <option>questionmult</option> avec l'option
+  <option>completemulti</option>, chaque environnement <option>reponses</option>
+  ajoute la question finale <emphasis>Aucune de ces réponses n'est correcte</emphasis>. 
+  Il faut donc supprimer cette option pour les premières utilisations de reponses. Voir <xref endterm="sec.package.options.title"
+  linkend="sec.package.options"/>.</para></warning>
+  <programlisting>
+  \begin{questionmult}{R.ect-b}
+  Un écart type est un indicateur\dots
+
+  \emph{(concernant son objectif)}
+  {\AMCnoCompleteMulti
+    \mauvaise{de tendance centrale}
+    \bonne{de dispersion}
+  \end{reponses}}
+
+  \emph{(concernant sa sensibilité)}
+  {\AMCnoCompleteMulti\begin{reponses}
+    \bonne{sensible aux valeurs extrêmes}
+    \mauvaise{peu sensible aux valeurs extrêmes}
+  \end{reponses}}
+
+  \emph{(concernant sa dimension)}
+  \begin{reponses}
+    \bonne{de même unité que les valeurs}
+    \mauvaise{d'unité différente des valeurs
+  \end{reponses}
+\end{questionmult}
+  </programlisting>
+          </sect4>
+
+
          <sect4 id="questionsouvertes">
         <title>Questions ouvertes</title>
 
@@ -2747,7 +2801,7 @@ P=\qty{\aCalculateVariable}{\newton}}}{le barème}
           </sect5>
 
           <sect5 id="questions.counter">
-          	<title>Compteur de questions</title>
+          	<title id="questions.counter.title">Compteur de questions</title>
           	<para>Le compteur interne des questions est <code>AMCquestionaff</code>.
           	Pour afficher le nombre total de questions en début de sujet, il faut utiliser
           	le paquet <package>totcount</package>. Voici un exemple :</para>
@@ -2826,7 +2880,31 @@ Durée : 10 minutes.
 \end{document}
 </programlisting>
           </sect5>
-        </sect4>
+
+        <sect5 id="answers.counter">
+          <title id="answers.counser.title">Compteur de réponses</title>
+          <para>Le compteur est <code>AMC@ncase</code>.</para>
+<programlisting>
+% après le \begin{document}
+\makeatletter
+\def\proposition{Proposition \alph{AMC@ncase} :}
+\makeatother
+% ...
+% et pour une question
+\begin{question}{identifiant}
+Question…
+
+\begin{reponses}
+\bonne{\proposition{} texte…}
+\mauvaise{\proposition{} texte…}
+\mauvaise{\proposition{} texte…}
+\end{reponses}
+\end{question}
+</programlisting>
+        </sect5>
+      </sect4>
+
+
 
       <sect4 id="latex.choices.multicol">
         <title>Réponses sur plusieurs colonnes</title>
@@ -4113,11 +4191,27 @@ et inscrivez votre nom et prénom ci-dessous.
         <para>Dans le préambule, déclarez les commandes ci-dessous (ici avec
         les valeurs par défaut).</para>
 
-        <programlisting>\makeatletter
+<programlisting>\makeatletter
 \def\AMC@NCBetud{12}
 \def\AMC@NCBpage{6}
 \def\AMC@NCBcheck{6}
-\makeatother          </programlisting>
+\makeatother
+</programlisting>
+
+<tip><para>Pour démarrer le numéro de copies à une autre valeur que 1 (ici 141).</para>
+<programlisting>
+\makeatletter
+\AMCid@etudstart=141
+\makeatother</programlisting>
+
+<para>Pour changer la valeur du code de sécurité (60 par défaut) à 59.</para>
+<programlisting>
+\makeatletter
+\advance\AMCid@check\m@ne
+\makeatother
+</programlisting>
+</tip>
+
       </sect3>
     </sect2>
 
@@ -7496,7 +7590,7 @@ topics:
           </listitem>
 
           <listitem>
-            <para>A côté des cases.</para>
+            <para>À côté des cases.</para>
           </listitem>
 
           <listitem>
@@ -7506,10 +7600,21 @@ topics:
           </listitem>
         </itemizedlist>
       </sect3>
+      
+     <sect3 id="annotations.layers">
+       <title id="annotations.layers.title">Correction à imprimer sur les originaux</title>
+      <para>Pour imprimer la correction sur les copies originales (<emphasis>impérativement</emphasis>
+      classées par ordre croissant alphabétique ou numérique), il faut créer un calque des annotations
+      qui sera imprimé avec les copies dans le bac à feuilles de la photocopieuse.</para>
+  <programlisting>
+gs -o Tous_correction_seule.pdf -sDEVICE=pdfwrite -dFILTERIMAGE Tous_etudiants.pdf
+  </programlisting>
+     </sect3> 
+      
     </sect2>
 
-    <sect2 id="preferences.defaut">
-      <title id="preferences.defaut.title">Les valeurs par défaut du menu
+    <sect2 id="preferences.default">
+      <title id="preferences.default.title">Les valeurs par défaut du menu
       Préférences</title>
 
       <para>Vous pouvez modifier les valeurs par défaut pour le traitement des
@@ -8991,10 +9096,7 @@ chmod 0600 /Users/<emphasis>nom_utilisateur</emphasis>/.msmtprc
           chiffres.</para>
 
           <programlisting>\usepackage{siunitx}
-\sisetup{locale = FR,detect-all,quotient-mode=fraction,
-         input-product=*, list-final-separator = { \translate{et} },
-         list-pair-separator = { \translate{et} },range-phrase = { \translate{à} },
-         separate-uncertainty = true,group-minimum-digits=3}
+\sisetup{locale = FR}
 </programlisting>
         </listitem>
 
