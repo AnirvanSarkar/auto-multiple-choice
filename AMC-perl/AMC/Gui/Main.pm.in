@@ -68,7 +68,7 @@ use Module::Load;
 use Module::Load::Conditional qw/check_install/;
 use Encode;
 
-use POSIX qw/strftime/;
+use POSIX qw/strftime setsid/;
 use Time::Local;
 
 use constant {
@@ -634,9 +634,15 @@ sub commande_parallele {
         my $pid = fork();
         if ( $pid == 0 ) {
             debug "Command // [$$] : " . join( " ", @c );
-            exec(@c)
-              || debug "Exec $$ : error";
+            setsid();
+            my $pid2 = fork();
+            if($pid2 == 0) {
+                exec(@c)
+                    || debug "Exec $$ : error";
+            }
             exit(0);
+        } else {
+            waitpid($pid, 0);
         }
     } else {
         my $dialog = Gtk3::MessageDialog->new( $self->get_ui('main_window'),
