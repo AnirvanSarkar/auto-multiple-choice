@@ -1323,7 +1323,8 @@ sub group_insert_command_def {
         $t .= $self->format_question($q) . "\n";
     }
     $t .= "\\insertgroup";
-    $t .= "[" . $group->{numquestions} . "]" if ( $group->{numquestions} );
+    $t .= "[" . $group->{numquestions} . "]"
+      if ( defined $group->{numquestions} );
     $t .= "{" . $self->group_name($group) . "}";
     for my $q ( grep { $_->{last} } ( @{ $group->{questions} } ) ) {
         $t .= "\n" . $self->format_question($q);
