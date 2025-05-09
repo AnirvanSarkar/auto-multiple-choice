@@ -95,5 +95,6 @@ print VMK "PACKAGE_V_PDFDATE=$k{year}$k{month}$k{day}000000\n";
 print VMK "PACKAGE_V_ISODATE=$k{year}-$k{month}-$k{day}\n";
 print VMK "PACKAGE_V_STY=$k{sty}\n";
 print VMK "PACKAGE_V_EPOCH=$k{epoch}\n";
+print VMK "PACKAGE_V_YEAR=$k{year}\n";
 close(VMK);
 
