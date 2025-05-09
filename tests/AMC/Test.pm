@@ -1127,7 +1127,7 @@ sub check_export_csv {
             {
                 local $ENV{LANG} = 'C';
                 $ok =
-                  run( ["unoconv", "-f", "csv", "$self->{temp_dir}/export.ods"],
+                  run( ["unoconv", "-T", 120, "-f", "csv", "$self->{temp_dir}/export.ods"],
                     '2>>', '/dev/null' );
             }
             if ( !$ok ) {
