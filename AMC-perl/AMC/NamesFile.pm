@@ -30,7 +30,7 @@ sub new {
     my ( $f, %o ) = @_;
     my $self = {
         fichier     => $f,
-        encodage    => 'utf-8',
+        encodage    => 'UTF-8',
         separateur  => '',
         identifiant => '',
 
@@ -91,6 +91,7 @@ sub load {
           )
         {
           LINE: while (<LISTE>) {
+                s/^\N{BOM}//;
                 if (/^\#/) {
                     $comment_lines++;
                     next LINE;
@@ -149,6 +150,9 @@ sub load {
 
             $self->{heads} = $csv->getline($io);
             if ( $self->{heads} ) {
+                for( @{ $self->{heads} } ) {
+                    s/^\N{BOM}//;
+                }
                 for my $h ( @{ $self->{heads} } ) {
                     $self->{'numeric.content'}->{$h} = 0;
                     $self->{'simple.content'}->{$h}  = 0;

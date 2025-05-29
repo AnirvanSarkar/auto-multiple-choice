@@ -32,7 +32,7 @@ our @ISA = ("AMC::Export");
 sub new {
     my $class = shift;
     my $self  = $class->SUPER::new();
-    $self->{'out.encodage'}   = 'utf-8';
+    $self->{'out.encodage'}   = 'UTF-8';
     $self->{'out.separateur'} = ",";
     $self->{'out.decimal'}    = ",";
     $self->{'out.entoure'}    = "\"";
@@ -116,7 +116,7 @@ sub export {
         } elsif ( $c eq 'student.copy' ) {
             push @columns, translate_column_title('copie');
         } else {
-            push @columns, encode( 'utf-8', $c );
+            push @columns, encode( 'UTF-8', $c );
         }
     }
 
