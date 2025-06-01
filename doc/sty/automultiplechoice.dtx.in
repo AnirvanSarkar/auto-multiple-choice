@@ -5095,15 +5095,9 @@ along with Auto-Multiple-Choice.  If not, see
 \DeclareOptionX{outsidebox}{\AMC@outside@boxtrue}
 \DeclareOptionX{calibration}{\AMC@calibrationtrue}
 \DeclareOptionX{nowatermark}{\AMC@watermarkfalse}
-\newcommand\AMC@catalogMode{%
-  \AMC@catalogtrue%
-  \AMC@watermarkfalse\AMC@correcheadtrue%
-  \AMC@correctrue\AMC@ordretrue\AMC@shuffleGfalse%
-  \AMC@fullGroupstrue%
-  \def\AMC@intituleHead{\AMC@loc@catalog}\AMC@affichekeystrue}
 \newcommand\AMC@keys@next{\AMC@keyslinefalse}
 \newcommand\AMC@keys@line{\AMC@keyslinetrue}
-\DeclareOptionX{catalog}{\AMC@catalogMode}
+\DeclareOptionX{catalog}{\AMC@catalogtrue}
 \DeclareOptionX{keys}[next]{\csname AMC@keys@#1\endcsname{}}
 \DeclareOptionX{francais}{\def\AMC@lang@code{FR}\AMC@loc@FR}
 \DeclareOptionX{lang}{\def\AMC@lang@code{#1}\csname AMC@loc@#1\endcsname}
@@ -5319,29 +5313,35 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 %    \begin{macrocode}
 \ifx\SujetExterne\undefined\else
 \message{***SUJET***^^J}
-\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse
+\AMC@catalogfalse\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse
 \fi
 \ifx\ScoringExterne\undefined\else
 \message{***SCORING***^^J}
-\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse\AMC@invisibletrue
+\AMC@catalogfalse\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse\AMC@invisibletrue
 \fi
 \ifx\CorrigeExterne\undefined\else
 \message{***CORRIGE***^^J}
-\AMC@calibrationfalse\AMC@correcheadtrue\AMC@correctrue\AMC@watermarkfalse
+\AMC@catalogfalse\AMC@calibrationfalse\AMC@correcheadtrue\AMC@correctrue\AMC@watermarkfalse
 \fi
 \ifx\CorrigeIndivExterne\undefined\else
 \message{***CORRIGE***^^J}
-\AMC@calibrationtrue\AMC@correcheadfalse\AMC@correctrue\AMC@watermarkfalse
+\AMC@catalogfalse\AMC@calibrationtrue\AMC@correcheadfalse\AMC@correctrue\AMC@watermarkfalse
 \fi
 \ifx\CatalogExterne\undefined\else
 \message{***CATALOG***^^J}
-\AMC@catalogMode
+\AMC@catalogtrue
 \fi
 \ifx\NoWatermarkExterne\undefined\else
 \AMC@watermarkfalse
 \fi
 \ifx\codeDigitExterne\undefined\else
 \AMCcodeID@@{\codeDigitExterne}
+\fi
+\ifAMC@catalog
+  \AMC@watermarkfalse\AMC@correcheadtrue%
+  \AMC@correctrue\AMC@ordretrue\AMC@shuffleGfalse%
+  \AMC@fullGroupstrue%
+  \def\AMC@intituleHead{\AMC@loc@catalog}\AMC@affichekeystrue
 \fi
 %    \end{macrocode}
 % \end{macro}\end{macro}\end{macro}\end{macro}\end{macro}
