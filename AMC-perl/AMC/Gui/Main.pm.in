@@ -1078,13 +1078,22 @@ sub plugins_add {
 #########################################################################
 
 sub update_visibility {
-    my ($self) = @_;
+    my ($self, $ahead) = @_;
     if($self->get('view_anonymity')) {
         $self->get_ui('partie_anonymity')->show_all();
     } else {
         $self->get_ui('partie_anonymity')->hide();
     }
     $self->anonymize_update();
+
+    # Update pannels sensitivity if activate_ahead has changed
+    if ( $ahead && $self->{project}->name ) {
+        debug_and_stderr "Update pannels sensitivity";
+        $self->{project}->capture->begin_transaction('Visi');
+        $self->update_analysis_summary();
+        $self->{project}->capture->end_transaction('Visi');
+        $self->noter_resultat();
+    }
 }
 
 sub projet_nouveau {
@@ -2654,7 +2663,8 @@ sub update_analysis_summary {
 
     my $ow = $self->{project}->capture->n_overwritten || 0;
 
-    $self->get_ui('onglet_notation')->set_sensitive( $n > 0 );
+    $self->get_ui('onglet_notation')
+      ->set_sensitive( ( $n > 0 ) || $self->get('activate_ahead') );
 
     # resume
 
@@ -3517,7 +3527,8 @@ sub noter_resultat {
     }
     $self->set_state( 'marking', $ok, $text );
     $self->update_available_codes();
-    $self->get_ui('onglet_reports')->set_sensitive( defined($avg) );
+    $self->get_ui('onglet_reports')
+      ->set_sensitive( defined($avg) || $self->get('activate_ahead') );
 }
 
 #########################################################################

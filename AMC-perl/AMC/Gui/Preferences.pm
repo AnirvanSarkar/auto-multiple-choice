@@ -590,10 +590,12 @@ sub accept {
             &{ $self->{detect_analysis_callback} }( $self->{callback_self} );
         }
     }
+    
+    my $ahead = $self->{config}->key_changed("activate_ahead");
 
     $self->{config}->save();
 
-    $self->{callback_self}->update_visibility();
+    $self->{callback_self}->update_visibility($ahead);
 }
 
 1;

@@ -437,6 +437,8 @@ sub defaults {
         anonymous_header          => '%(aID)',
         anonymous_header_allpages => 1,
 
+        activate_ahead => '',
+
         recent_projects => [],
     };
 

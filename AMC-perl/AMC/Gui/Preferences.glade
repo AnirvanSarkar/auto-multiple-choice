@@ -1415,6 +1415,60 @@
                     <property name="position">1</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkFrame" id="expert_frame">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label-xalign">0</property>
+                    <property name="shadow-type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="expert_alignment">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="left-padding">12</property>
+                        <child>
+                          <object class="GtkBox" id="box_expert">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkCheckButton" id="pref_v_activate_ahead">
+                                <property name="label" translatable="yes">Activate pannels ahead of time</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="framelabel_expert">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Expert</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -3065,6 +3119,9 @@
                                             <property name="left-attach">1</property>
                                             <property name="top-attach">3</property>
                                           </packing>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
                                         </child>
                                         <child>
                                           <placeholder/>
