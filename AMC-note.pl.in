@@ -183,6 +183,13 @@ $scoring->variable( 'postcorrect_set_multiple', $postcorrect_set_multiple );
 
 my @captured_studentcopy = $capture->student_copies();
 
+my $fake = 0;
+if(!@captured_studentcopy) {
+    $fake = 1;
+    @captured_studentcopy = ([1,0]);
+}
+$scoring->variable( 'fake', $fake );
+
 # We already said that 0.05 of the work has been made, so the
 # remaining ratio $delta per student/copy is:
 
@@ -250,7 +257,7 @@ for my $sc (@captured_studentcopy) {
 
         $score->prepare_question($q);
         $score->set_type(0);
-        my ( $xx, $why ) = $score->score_question( $sc->[0], $q, 0 );
+        my ( $xx, $why ) = $score->score_question( $sc->[0], $q, $fake );
         $score->set_type(1);
         use Data::Dumper;
         debug( "1ST " . Dumper( $score->{env}->{directives} ) );

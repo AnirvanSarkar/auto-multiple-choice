@@ -232,6 +232,8 @@ sub pre_process {
     );
     $self->{_scoring}->begin_read_transaction('EXPP');
 
+    my $fake = $self->{_scoring}->variable('fake');
+
     my @err = $self->{_topics}->errors();
     if (@err) {
         $self->add_message(
@@ -285,6 +287,10 @@ sub pre_process {
         } else {
             for (qw/name line/) {
                 $m->{"student.$_"} = '?';
+            }
+            if ($fake) {
+                $m->{'student.name'} =
+                  sprintf( ( __ "Perfect student %d" ), $m->{student} );
             }
         }
         push @marks, $m;

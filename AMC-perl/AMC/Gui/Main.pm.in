@@ -4366,7 +4366,14 @@ sub exporte {
     my $code = $self->get('code_examen');
     $code = $self->{project}->name if ( !$code );
 
-    my $output       = $self->absolu( '%PROJET/exports/' . $code . $ext );
+    # If the scores are fake (no data capture), add a suffix to the
+    # output file name
+    my $fake = $self->{project}->scoring->variable_transaction('fake');
+    debug("Exporting from fake scoring data (no data capture)") if($fake);
+    my $output_suffix = ($fake ? "_0" : "");
+
+    my $output =
+      $self->absolu( '%PROJET/exports/' . $code . $output_suffix . $ext );
     my @needs_module = ();
 
     my %ofc =
