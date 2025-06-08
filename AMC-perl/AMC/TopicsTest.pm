@@ -236,6 +236,7 @@ my $topic_conditions = {
     aggregate => {
             regex => '^('
           . 'count\(([\d.]+)(?:,([\d.]+))?\)'
+          . '|countwhy\(\!?[0VEFPX](,[0VEFPX])*\)'
           . '|sumscores'
           . '|sumratios'
           . '|(min|max)(score|ratio)' . ')$'

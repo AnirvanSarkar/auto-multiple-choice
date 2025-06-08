@@ -472,6 +472,9 @@ sub value_calc_odf {
         }
         $subformula = join('+', @parts);
     }
+    if ( $agg =~ /countwhy\((.*)\)/ ) {
+        return ( undef, 0 );
+    }
 
     if ( $key eq 'score' ) {
         if ( $agg eq 'sumscores' ) {
@@ -648,7 +651,7 @@ sub student_topic_calc {
             if($self->get_option('skip_indicatives'));
         if ( defined( $r->{score} ) && ! $indic ) {
             debug "Student ($student,$copy) topic $topic->{id} score ($r->{score},$r->{max}) for question $q->{title}";
-            push @x, [ $r->{score}, $r->{max} ];
+            push @x, [ $r->{score}, $r->{max}, $r->{why} ];
             push @nums,
                 $self->{layout}->question_number( $student, $q->{question} );
             $all_empty = 0 if($r->{why} ne 'V');
@@ -667,8 +670,10 @@ sub student_topic_calc {
         $smax = 1;
     }
     for my $xm (@x) {
-        my $s1 = $xm->[0];
-        my $m1 = $xm->[1];
+        my $s1  = $xm->[0];
+        my $m1  = $xm->[1];
+        my $why = $xm->[2];
+        
         if ( $agg eq 'sumscores' ) {
             $s    += $s1;
             $smax += $m1;
@@ -695,6 +700,23 @@ sub student_topic_calc {
             my $max = $2;
             $max = $min if ( !defined($max) );
             $s += 1 if ( $s1 >= $min && $s1 <= $max );
+            $smax += 1;
+        } elsif ( $agg =~ /countwhy\((.*)\)/ ) {
+            my $values  = $1;
+            my $inverse = 0;
+            if ( $values =~ /!(.*)/ ) {
+                $inverse = 1;
+                $values  = $1;
+            }
+            $values =~ s/,/|/g;
+            $values =~ s/0//;
+            $values = "^(" . $values . ")\$";
+            if ($inverse) {
+                $s += 1 if ( $why !~ /$values/ );
+            }
+            else {
+                $s += 1 if ( $why =~ /$values/ );
+            }
             $smax += 1;
         } else {
             die "Unknown aggregate function : $topic->{aggregate}";

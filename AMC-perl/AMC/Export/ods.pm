@@ -1709,14 +1709,26 @@ sub export {
                   $topics->value_calc_odf( $t, $score_cells, $max_cells,
                     $n_cells );
                 my $pc = ( $t->{value} =~ /:pc/ ? 1 : 0 );
-                set_cell(
-                    $doc, $feuille, $jj, $ii, $m->{abs},
-                    'TOPIC' . $t->{id}, '',
-                    pc      => $pc,
-                    numeric => !$pc,
-                    formula => "oooc:=" . $formula,
-                    matrix  => $matrix
-                );
+                if ( defined($formula) ) {
+                    set_cell(
+                        $doc, $feuille, $jj, $ii, $m->{abs},
+                        'TOPIC' . $t->{id}, '',
+                        pc      => $pc,
+                        numeric => !$pc,
+                        formula => "oooc:=" . $formula,
+                        matrix  => $matrix
+                    );
+                } else {
+                    my $s =
+                      $topics->student_topic_calc( $m->{student}, $m->{copy},
+                        $t );
+                    set_cell(
+                        $doc, $feuille, $jj, $ii, $m->{abs},
+                        'TOPIC' . $t->{id}, $s->{value},
+                        pc      => $pc,
+                        numeric => !$pc,
+                    );
+                }
                 push @{ $col_cells{$ii} }, $jj;
             } else {
                 $doc->cellStyle( $feuille, $jj, $ii, 'NoteX' );
