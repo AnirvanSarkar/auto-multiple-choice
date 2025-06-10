@@ -1205,8 +1205,10 @@ sub check_export_csv {
                     && defined( $heads{ $t->{-question} } )
                     && defined( $t->{-score} ) )
                 {
+                    my $csvvalue = $row->[ $heads{ $t->{-question} } ];
+                    $csvvalue =~ s/,/./;
                     $self->test(
-                        $row->[ $heads{ $t->{-question} } ],
+                        $csvvalue,
                         $t->{-score},
                         "score for $goodrow Q=" . $t->{-question},
                         digits => $t->{-digits}
@@ -1441,6 +1443,7 @@ sub test {
         no warnings 'uninitialized';
         if ( defined( $opts{digits} ) && $opts{digits} ne '' ) {
             for my $z ( \$x, \$v ) {
+                $$z =~ s/,/./;
                 $$z = sprintf( "%.$opts{digits}f", $$z );
             }
         }
