@@ -46,6 +46,13 @@ AMC::Test->new(
         { -copy => 2, -question => 'c3:max',    -score => 4 },
         { -copy => 2, -question => 'c23:score', -score => 3 },
         { -copy => 2, -question => 'c23:max',   -score => 4 },
+
+        { -copy => 2, -question => 'respect:score', -score => 0 },
+        { -copy => 2, -question => 'respect:level', -score => 0 },
+        { -copy => 2, -question => 'eandp:score',   -score => 0 },
+        { -copy => 3, -question => 'respect:score', -score => 3 },
+        { -copy => 3, -question => 'respect:level', -score => "2+" },
+        { -copy => 3, -question => 'eandp:score',   -score => 4 },
     ],
     export_full_ods => [
         { -copy => 2, -question => 'ASs', -score => 14 / 19, -digits => 4 },
@@ -61,5 +68,12 @@ AMC::Test->new(
         { -copy => 2, -question => 'Amr', -score => '70%' },
         { -copy => 2, -question => 'c3',  -score => 2 },
         { -copy => 2, -question => 'c23', -score => '75%' },
+
+        { -copy => 2, -question => 'respect',   -score => 0 },
+        { -copy => 2, -question => 'respect#2', -score => 0 },
+        { -copy => 2, -question => 'eandp',     -score => 0 },
+        { -copy => 3, -question => 'respect',   -score => 3 },
+        { -copy => 3, -question => 'respect#2', -score => "2+" },
+        { -copy => 3, -question => 'eandp',     -score => 4 },
     ],
 )->default_process;

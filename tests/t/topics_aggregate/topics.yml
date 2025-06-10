@@ -1,4 +1,6 @@
 ---
+preferences:
+  odscolumns: level,value
 
 topics:
   - id: ASs
@@ -54,4 +56,19 @@ topics:
       - A-2
       - B-1
       - B-3
-
+  - id: respect
+    name: number of inconsistencies
+    aggregate: countwhy(E)
+    value: score
+    questions: "*"
+    levels:
+      - min: 1.5
+        code: 2+
+      - min: 0.5
+        code: 1
+      - code: 0
+  - id: eandp
+    name: number of not standard nor empty (here E and P)
+    aggregate: "countwhy(!0,V)"
+    value: score
+    questions: "*"
