@@ -428,7 +428,8 @@ sub level_test_odf {
 
 sub level_short_odf {
     my ( $self, $level ) = @_;
-    my $v = $level->{code} || $level->{i};
+    my $v = $level->{code};
+    $v = $level->{i} if ( !defined($v) );
     $v = '"' . $v . '"' if ( $v !~ /^[0-9]+$/ );
     return ($v);
 }
