@@ -194,7 +194,7 @@ sub system_debug {
     debug( "Calling cmd: " . join( " ", @{ $o{cmd} } ) );
     if ( !commande_accessible( $o{cmd}->[0], 1 ) ) {
         debug_and_stderr("Can't find command: $o{cmd}->[0]");
-        die "Command failed" if ( $o{die_on_error} );
+        die "Command not found: $o{cmd}->[0]. Please check that it is properly installed." if ( $o{die_on_error} );
         return (-1);
     }
     my $in = '';
