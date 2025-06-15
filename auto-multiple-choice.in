@@ -28,6 +28,7 @@ use File::Spec::Functions qw/catfile catpath splitpath updir/;
 use Cwd;
 
 my $mods_dir="@/MODSDIR/@";
+my $system_type="@/SYSTEM_TYPE/@";
 $ENV{'LC_NUMERIC'}="C";
 
 sub mod_path {
@@ -41,7 +42,7 @@ sub mod_path {
 }
 
 # For portable distribution
-if(! -d $mods_dir) {
+if($system_type eq "portable") {
     my ($volume,$directory,$file) = splitpath(__FILE__);
     my $wd=getcwd();
     my $base_dir=catfile(catpath( $volume, $directory ),updir);
