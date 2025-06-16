@@ -3883,6 +3883,10 @@ along with Auto-Multiple-Choice.  If not, see
   Texponent .initial:n = { $\times10$\textasciicircum },
   vspace .code:n = {\AMCnumeric@Vspace=#1},
   hspace .code:n = {\AMCnumeric@Hspace=#1},
+  arraybordercol .code:n = {\def\AMCnarray@Border{#1}},
+  arraybordercol .initial:n = { black ! 20 },
+  arrayborderwidth .code:n = {\def\AMCnarray@BorderWidth{#1}},
+  arrayborderwidth .initial:n = { .5mm },
   bordercol .code:n = {\def\AMCncol@Border{#1}},
   bordercol .initial:n = { lightgray },
   borderwidth .code:n = {\def\AMCncol@BorderWidth{#1}},
@@ -3891,6 +3895,8 @@ along with Auto-Multiple-Choice.  If not, see
   backgroundcol .initial:n = { white },
   digits .int_set:N = \amc_num_ndigits_int,
   digits .initial:n = { 3 },
+  digitcols .int_set:N = \amc_num_digitcols_int,
+  digitcols .initial:n = { 1 },
   decimals .int_set:N = \amc_num_decd_int,
   decimals .initial:n = { 0 },
   exponent .int_set:N = \amc_num_expo_int,
@@ -3900,6 +3906,9 @@ along with Auto-Multiple-Choice.  If not, see
   sign .bool_set:N = \amc_num_sign_bool,
   sign .initial:n = { true },
   sign .default:n = { true },
+  plussign .bool_set:N = \amc_num_plussign_bool,
+  plussign .initial:n = { true },
+  plussign .default:n = { true },
   exposign .bool_set:N = \amc_num_exposign_bool,
   exposign .initial:n = { true },
   exposign .default:n = { true },
@@ -4015,23 +4024,29 @@ along with Auto-Multiple-Choice.  If not, see
 \cs_new:Npn \amc_num_sign_boxes:Nn #1 #2 {
   \int_case:nn { #1 } {
     { -1 } {
-      \hbox{\amc_num_char:nn{$+$}{}}
-      \vspace{\AMCnumeric@Vspace}
-      \AMCmessage{B=set. sign #2 =1}
+      \bool_if:NTF \amc_num_plussign_bool {
+        \hbox{\amc_num_char:nn{$+$}{}}
+        \vspace{\AMCnumeric@Vspace}
+        \AMCmessage{B=set. sign #2 =1}
+      } { }
       \hbox{\amc_num_char:nn{$-$}{\AMC@checkedbox}}
       \AMCmessage{B=set. sign #2 =-1}
     }
     { 1 } {
-      \hbox{\amc_num_char:nn{$+$}{\AMC@checkedbox}}
-      \vspace{\AMCnumeric@Vspace}
-      \AMCmessage{B=set. sign #2 =1}
+      \bool_if:NTF \amc_num_plussign_bool {
+        \hbox{\amc_num_char:nn{$+$}{\AMC@checkedbox}}
+        \vspace{\AMCnumeric@Vspace}
+        \AMCmessage{B=set. sign #2 =1}
+      } { }
       \hbox{\amc_num_char:nn{$-$}{}}
       \AMCmessage{B=set. sign #2 =-1}
     }
     { 0 } {
-      \hbox{\amc_num_char:nn{$+$}{}}
-      \vspace{\AMCnumeric@Vspace}
-      \AMCmessage{B=set. sign #2 =1}
+      \bool_if:NTF \amc_num_plussign_bool {
+        \hbox{\amc_num_char:nn{$+$}{}}
+        \vspace{\AMCnumeric@Vspace}
+        \AMCmessage{B=set. sign #2 =1}
+      } { }
       \hbox{\amc_num_char:nn{$-$}{}}
       \AMCmessage{B=set. sign #2 =-1}
     }
@@ -4042,7 +4057,7 @@ along with Auto-Multiple-Choice.  If not, see
 % |\amc_num_digit_boxes_h:nnn|\marg{varname}\marg{correct}\marg{maxdigit}
 % draws a serie of boxes for all possible values of a digit (from 0 to
 % \meta{maxdigit}), where the correct value is \meta{correct},
-% transmitting scoring data to AMC so that the vaiable \meta{varname}
+% transmitting scoring data to AMC so that the variable \meta{varname}
 % will be set to the value chosen by the student.
 %    \begin{macrocode}
 \cs_new:Npn \amc_num_digit_boxes_h:nnn #1 #2 #3 {
@@ -4056,6 +4071,12 @@ along with Auto-Multiple-Choice.  If not, see
   \hspace{-\AMCnumeric@Hspace}
 }
 
+%    \end{macrocode}
+%   The command
+%   |\amc_num_digit_boxes_v:nnn|\marg{varname}\marg{correct}\marg{maxdigit}
+%   does the same as |\amc_num_digit_boxes_h:nnn|, with a vertical
+%   disposition.
+%    \begin{macrocode}
 \cs_new:Npn \amc_num_digit_boxes_v:nnn #1 #2 #3 {
   \int_step_inline:nnnn
   { \bool_if:NTF \amc_num_nozero_bool { 1 } { 0 } }
@@ -4068,6 +4089,67 @@ along with Auto-Multiple-Choice.  If not, see
       \vspace{\AMCnumeric@Vspace}
     } {}
   }
+}
+
+%    \end{macrocode}
+%   The command
+%   |\amc_num_digit_boxes_a:nnn|\marg{varname}\marg{correct}\marg{maxdigit}
+%   does the same as |\amc_num_digit_boxes_h:nnn|, with an array
+%   disposition with |\amc_num_digitcols_int| columns.
+%    \begin{macrocode}
+\int_new:N \amc_num_array_int
+\int_new:N \amc_num_array_col_int
+\int_new:N \amc_num_array_row_int
+\int_new:N \amc_num_array_nrows_int
+\int_new:N \amc_num_array_i_int
+\tl_new:N \amc_num_array_tl
+
+\cs_new:Npn \amc_tabular_defs:nn #1 #2 {
+  \begin{tabular}[#1]{ #2 }
+}
+\cs_generate_variant:Nn \amc_tabular_defs:nn { xx }
+
+\cs_new:Npn \amc_num_digit_boxes_a:nnn #1 #2 #3 #4 {
+  \tl_set:Nn \amc_num_array_tl l
+  \int_step_inline:nnnn 2 1 \amc_num_digitcols_int {
+    \tl_put_right:Nn \amc_num_array_tl { |l }
+  }
+  \fboxrule=\AMCnarray@BorderWidth
+  \fboxsep=1pt
+  \fcolorbox{\AMCnarray@Border}{\AMCncol@Background}{\hspace*{-.2em}
+  \arrayrulecolor{\AMCnarray@Border}\setlength{\tabcolsep}{4pt}
+  \hbox{\amc_tabular_defs:xx { b } { \tl_use:N \amc_num_array_tl }
+    \int_gzero:N \amc_num_array_int
+
+    \int_gzero:N \amc_num_array_row_int
+    \int_gset:Nn \amc_num_array_nrows_int
+      { \int_div_truncate:nn { #4 - #3 + \amc_num_digitcols_int - 1 }
+          \amc_num_digitcols_int }
+    \int_do_while:nNnn \amc_num_array_row_int < \amc_num_array_nrows_int {
+      \int_gzero:N \amc_num_array_col_int
+      \int_do_while:nNnn \amc_num_array_col_int < \amc_num_digitcols_int {
+
+        \int_set:Nn \amc_num_array_i_int
+          { #3 + \amc_num_array_row_int +
+            \amc_num_array_col_int * \amc_num_array_nrows_int }
+
+        \int_compare:nNnTF \amc_num_array_i_int < #4 {
+          \vbox{\hbox{
+            \amc_num_digit_box:nn { \int_use:N \amc_num_array_i_int }{ #2 }
+          }}
+          \AMCmessage{B= set. #1 = \int_use:N \amc_num_array_i_int}
+        } { }
+
+        \int_gincr:N \amc_num_array_col_int
+
+        \int_compare:nNnTF \amc_num_array_col_int < \amc_num_digitcols_int { & } { }
+      }
+      \int_gincr:N \amc_num_array_row_int
+
+      \int_compare:nNnTF \amc_num_array_row_int < \amc_num_array_nrows_int { \\ } { }
+    }
+
+  \end{tabular}}\hspace*{-.2em}}
 }
 
 \int_new:N \amc_num_first_digit_int
@@ -4111,14 +4193,23 @@ along with Auto-Multiple-Choice.  If not, see
                 { \amc_num_digit_int - 1 } }\hfill}}
           \vspace{\AMCnumeric@Vspace}
         } { }
-        \bool_if:NTF \amc_num_reverse_bool {
-          \amc_num_digit_boxes_vr:nnn { #2
-            \int_to_Alph:n \amc_num_digit_int }
-          { ##1 } { \amc_num_base_int }
+        \int_compare:nNnTF \amc_num_digitcols_int = 1 {
+          \bool_if:NTF \amc_num_reverse_bool {
+            \amc_num_digit_boxes_vr:nnn { #2
+              \int_to_Alph:n \amc_num_digit_int }
+            { ##1 } { \amc_num_base_int }
+          } {
+            \amc_num_digit_boxes_v:nnn { #2
+              \int_to_Alph:n \amc_num_digit_int }
+            { ##1 } { \amc_num_base_int }
+          }
         } {
-          \amc_num_digit_boxes_v:nnn { #2
-            \int_to_Alph:n \amc_num_digit_int }
-          { ##1 } { \amc_num_base_int }
+          \hbox{
+            \amc_num_digit_boxes_a:nnn { #2
+              \int_to_Alph:n \amc_num_digit_int }
+            { ##1 } { \bool_if:NTF \amc_num_nozero_bool { 1 } { 0 } }
+            \amc_num_base_int
+          }
         }
       }}
 %    \end{macrocode}
@@ -4145,10 +4236,18 @@ along with Auto-Multiple-Choice.  If not, see
       \amc_num_digit_int = { #3 } {
         \hbox{ \AMCdecimalPoint }
       } { }
-      \hbox{
-        \amc_num_digit_boxes_h:nnn { #2
-          \int_to_Alph:n \amc_num_digit_int }
-        { ##1 } \amc_num_base_int
+      \int_compare:nNnTF \amc_num_digitcols_int = 1 {
+        \hbox{
+          \amc_num_digit_boxes_h:nnn { #2
+            \int_to_Alph:n \amc_num_digit_int }
+          { ##1 } \amc_num_base_int
+        }
+      } {
+        \hbox{
+          \amc_num_digit_boxes_a:nnn { #2
+            \int_to_Alph:n \amc_num_digit_int }
+          { ##1 } { \bool_if:NTF \amc_num_nozero_bool { 1 } { 0 } } \amc_num_base_int
+        }
       }
       \int_compare:nNnTF \amc_num_digit_int > 1 {
         \vspace{\AMCnumeric@Vspace}
@@ -4157,32 +4256,44 @@ along with Auto-Multiple-Choice.  If not, see
     }}
 }
 
+\cs_new:Npn \amc_num_sign_boxes:NnN #1 #2 #3 {
+  \vbox{
+    \ifx\AMCntextSign\@empty\@empty\else
+      \hbox{\AMCntextSign}\vspace{\AMCnumeric@Vspace}\fi
+    \bool_if:NTF \amc_num_strict_bool {
+      \int_compare:nNnTF { #3 } = 0 {
+        \amc_num_sign_boxes:Nn { 1 } { #2 }
+      }{
+        \amc_num_sign_boxes:Nn { #3 } { #2 }
+      }
+    }{
+      \amc_num_sign_boxes:Nn { #3 } { #2 }
+    }
+  }
+}
+
 %    \end{macrocode}
 % Finally, |\amc_num_integer_boxes:NnnNN|\marg{correct
 % digits}\marg{prefix}\marg{decimals}\marg{sign bool}\marg{sign} draws
 % boxes for integer entry, including the sign if \meta{sign bool} is
 % true. When using the |strict| option, check the + box for a null value.
 %    \begin{macrocode}
-
 \cs_new:Npn \amc_num_integer_boxes:NnnNN #1 #2 #3 #4 #5 {
   \hbox{
     \bool_if:NTF { #4 } {
-      \vbox{
-        \ifx\AMCntextSign\@empty\@empty\else
-        \hbox{\AMCntextSign}\vspace{\AMCnumeric@Vspace}\fi
-        \bool_if:NTF \amc_num_strict_bool {
-          \int_compare:nNnTF { #5 } = 0 {
-            \amc_num_sign_boxes:Nn { 1 } { #2 }
-          }{
-            \amc_num_sign_boxes:Nn { #5 } { #2 }
-          }
-        }{
-          \amc_num_sign_boxes:Nn { #5 } { #2 }
+      \int_compare:nNnTF \amc_num_digitcols_int = 1 {
+        \amc_num_sign_boxes:NnN { #1 } { #2 } { #5 }
+        \hspace{\AMCnumeric@Hspace}
+        \vrule
+        \hspace{\AMCnumeric@Hspace}
+      } {
+        \fboxrule=\AMCnarray@BorderWidth
+        \fboxsep=1pt
+        \fcolorbox{\AMCnarray@Border}{\AMCncol@Background}{
+          \amc_num_sign_boxes:NnN { #1 } { #2 } { #5 }
         }
+        \hspace{\AMCnumeric@Hspace}
       }
-      \hspace{.5em}
-      \vrule
-      \hspace{.5em}
     } { }
     \hbox{
       \bool_if:NTF \amc_num_vertical_bool
