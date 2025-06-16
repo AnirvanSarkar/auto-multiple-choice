@@ -130,15 +130,34 @@ sub new {
 
 sub set_css {
     my ($self) = @_;
-    my $css = Gtk3::CssProvider->new();
-    my $css_file = "@/CSSDIR/@/auto-multiple-choice.css";
-    my $user_css_file = amc_user_confdir() . "/auto-multiple-choice.css";
-    $css_file = $user_css_file if ( -f $user_css_file );
-    $css->load_from_path($css_file) if ( -f $css_file );
-
-    Gtk3::StyleContext::add_provider_for_screen(
-        $self->get_ui('main_window')->get_screen(),
-        $css, Gtk3::STYLE_PROVIDER_PRIORITY_APPLICATION );
+    my @css_files = (
+        [
+            "@/CSSDIR/@/auto-multiple-choice.css",
+            Gtk3::STYLE_PROVIDER_PRIORITY_APPLICATION
+        ]
+    );
+    if($ENV{'AMCBASEDIR'}) {
+        push @css_files,
+          [
+            $ENV{'AMCBASEDIR'} . "/css/auto-multiple-choice.css",
+            Gtk3::STYLE_PROVIDER_PRIORITY_APPLICATION
+          ];
+    }
+    push @css_files,
+      [
+        amc_user_confdir() . "/auto-multiple-choice.css",
+        Gtk3::STYLE_PROVIDER_PRIORITY_USER
+      ];
+    for my $fp (@css_files) {
+        my ($file, $priority) = @$fp;
+        if(-f $file) {
+            my $css = Gtk3::CssProvider->new();
+            $css->load_from_path($file);
+            Gtk3::StyleContext::add_provider_for_screen(
+                $self->get_ui('main_window')->get_screen(),
+                $css, $priority);
+        }
+    }
 }
 
 # tests if debian package auto-multiple-choice-common is installed but
