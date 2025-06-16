@@ -1104,59 +1104,78 @@ sub page_qids {
 # draws the page header (only on the first page if verdict_allpages is false)
 
 sub page_header {
-    my ( $self, $student ) = @_;
+    my ( $self, $student, $page ) = @_;
 
     if ( !$self->{header_drawn} ) {
 
-        $self->needs_names;
+        my $x0;
+        my $y0;
+        my $width;
+        my $draw = 0;
 
-        $self->command(
-                "begin header "
-              . ( $self->{single_output} ? 0 : 1 ) . " "
-              . (
-                 $self->{width}
-                 - $self->{dist_margin_globaltext} * $self->{dpi} * 2
-              )
-        );
+        if($self->{header_zone}) {
+            my ($z) =
+                $self->{layout}->type_info( "zone", $student->[0], $page, "report" );
 
-        $self->set_color( $self->{text_color}, "h" );
-        $self->command("matrix identity");
-        $self->stext(
-            $self->{subst}->substitute( $self->{verdict}, @$student ) );
-        $self->command(
-            "hstext "
-              . (
+            if($z) {
+                $draw  = 2;
+                $x0    = ( $self->{rtl} ? $z->{xmax} : $z->{xmin} );
+                $y0    = $z->{ymin};
+                $width = $z->{xmax} - $z->{xmin};
+            }
+        } else {
+            $draw = 1;
+            $x0   = (
                   $self->{rtl}
                 ? $self->{width} -
                   $self->{dist_margin_globaltext} * $self->{dpi}
                 : $self->{dist_margin_globaltext} * $self->{dpi}
-              )
-              . " "
-              . ( $self->{dist_margin_globaltext} * $self->{dpi} ) . " "
-              . ( $self->{rtl} ? "1.0" : "0.0" ) . " 0.0"
-                      );
+            );
+            $y0    = $self->{dist_margin_globaltext} * $self->{dpi};
+            $width = $self->{width} -
+              $self->{dist_margin_globaltext} * $self->{dpi} * 2;
+        }       
 
-        # Add topics...
+        if($draw) {
+            $self->needs_names;
+        
+            $self->command( "begin header "
+                  . ( $self->{single_output} ? 0 : 1 ) . " "
+                  . $width );
+            
+            $self->set_color( $self->{text_color}, "h" );
+            $self->command("matrix identity") if($draw==1);
+            $self->stext(
+                $self->{subst}->substitute( $self->{verdict}, @$student ) );
+            $self->command( "hstext "
+                  . $x0 . " "
+                  . $y0 . " "
+                  . ( $self->{rtl} ? "1.0" : "0.0" )
+                  . " 0.0" );
 
-        for my $t ( $self->{topics}->all_topics() ) {
-            debug "Topic $t->{id}";
-            my $s = $self->{topics}->student_topic_message( @$student, $t );
-            if ($s) {
-                for my $line ( split( /\n/, $s->{message} ) ) {
-                    $self->set_color( $s->{color} || $self->{text_color}, "h" );
-                    $self->command( "hnexttext "
-                          . ( $self->{rtl} ? "1.0" : "0.0" ) . " 0.0 "
-                          . $line );
+            # Add topics...
+
+            for my $t ( $self->{topics}->all_topics() ) {
+                debug "Topic $t->{id}";
+                my $s = $self->{topics}->student_topic_message( @$student, $t );
+                if ($s) {
+                    for my $line ( split( /\n/, $s->{message} ) ) {
+                        $self->set_color( $s->{color} || $self->{text_color},
+                            "h" );
+                        $self->command( "hnexttext "
+                              . ( $self->{rtl} ? "1.0" : "0.0" ) . " 0.0 "
+                              . $line );
+                    }
                 }
             }
+
+            $self->{header_drawn} = 1;
+
+            $self->command("show header");
         }
 
-        $self->{header_drawn} = 1;
-
-        $self->command("show header");
-
     } else {
-        if($self->{verdict_allpages}) {
+        if($self->{verdict_allpages} && !$self->{header_zone}) {
             $self->command("show header");
         }
     }
@@ -1183,8 +1202,7 @@ sub student_draw_page {
         if ( $self->{anonymous} ) {
             $self->page_qids( $student, $page->{page} );
         }
-        $self->command("matrix identity");
-        $self->page_header($student);
+        $self->page_header($student, $page->{page});
     } else {
         debug "Nothing to draw for this page";
     }
@@ -1228,6 +1246,8 @@ sub process_student {
     $self->{data}->begin_read_transaction('aOST');
 
     $self->{header_drawn} = 0;
+    $self->{header_zone} = $self->{layout}->has_zone('report', $student->[0]);
+    
     for my $page ( $self->student_pages($student) ) {
         $self->student_draw_page( $student, $page );
     }

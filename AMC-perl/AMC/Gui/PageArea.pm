@@ -385,6 +385,7 @@ sub draw {
         (
                $self->{layinfo}->{box}
             || $self->{layinfo}->{namefield}
+            || $self->{layinfo}->{reportzone}
             || $self->{layinfo}->{idzone}
         )
         && ( $self->{layinfo}->{page}->{width} )
@@ -402,8 +403,10 @@ sub draw {
         if ( $self->{zones} ) {
             Gtk3::Gdk::cairo_set_source_rgba( $context, $self->{colorzone} );
 
-            for $box ( @{ $self->{layinfo}->{idzone} } ) {
-                $self->draw_box( $context, $box, '', 0 );
+            for my $key (qw/idzone reportzone/) {
+                for $box ( @{ $self->{layinfo}->{$key} } ) {
+                    $self->draw_box( $context, $box, '', 0 );
+                }
             }
         }
         if ( $self->{marks} ) {

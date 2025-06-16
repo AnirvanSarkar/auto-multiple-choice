@@ -600,7 +600,7 @@ sub charge_i {
 
         debug "Getting layout info";
 
-        for (qw/box questionbox namefield idzone digit scorezone/) {
+        for (qw/box questionbox namefield idzone digit scorezone reportzone/) {
             $self->{layinfo}->{$_} = [];
         }
 
@@ -631,6 +631,9 @@ sub charge_i {
                 for my $c ( $self->{layout}->type_info( $type, @ep ) ) {
                     push @{ $self->{layinfo}->{$type} }, {%$c};
                 }
+            }
+            for my $c ( $self->{layout}->type_info( 'zone', @ep, 'report' ) ) {
+                push @{ $self->{layinfo}->{reportzone} }, {%$c};
             }
 
             $self->{layinfo}->{page} = $self->{layout}->page_info(@ep);

@@ -816,6 +816,16 @@ sub define_statements {
               . $self->table("zone")
               . " WHERE student=? AND page=? AND zone='__n'"
         },
+        zoneInfo => {
+                sql => "SELECT * FROM "
+              . $self->table("zone")
+              . " WHERE student=? AND page=? AND zone=?"
+        },
+        hasZone => {
+                sql => "SELECT count(*) FROM "
+              . $self->table("zone")
+              . " WHERE student=? AND zone=?"
+        },
         idzoneInfo => { sql => "SELECT * FROM "
               . $self->table("zone")
               . " WHERE student=? AND page=? AND flags & 1 = 1"
@@ -1045,12 +1055,26 @@ sub page_info {
     );
 }
 
+# has_zone($name, $student) returns the nomber of zones with name
+# $name registered for student $student.
+
+sub has_zone {
+    my ($self, $name, $student) = @_;
+    return (
+        $self->sql_single(
+            $self->statement('hasZone'),
+            $student, $name
+        )
+    );
+}
+
 # type_info($type,$student,$page,$role) returns an array of HASH
 # references containing all fiels in the $type table ($type may equal
-# digit, box, namefield or idzone) corresponding to the $student,$page
-# page. The $role argument (which defaults to BOX_ROLE_ANSWER) is only
-# needed when $type is 'box' (or you can use $type='questionbox' with
-# no $role).
+# digit, box, namefield, zone or idzone) corresponding to the
+# $student,$page page. The $role argument (which defaults to
+# BOX_ROLE_ANSWER) is only needed when $type is 'box' (or you can use
+# $type='questionbox' with no $role), or when $type is 'zone' (in this
+# case $role is the zone name).
 
 sub type_info {
     my ( $self, $type, $student, $page, $role, $rolemax ) = @_;
@@ -1073,6 +1097,9 @@ sub type_info {
         $role    = BOX_ROLE_ANSWER if ( !$role );
         $rolemax = $role           if ( !$rolemax );
         push @args, $role, $rolemax;
+    }
+    if ( $type eq 'zone' ) {
+        push @args, $role;
     }
     return (
         @{
