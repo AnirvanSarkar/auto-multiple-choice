@@ -50,6 +50,7 @@ use AMC::Gui::Preferences;
 use AMC::Gui::Prefs;
 use AMC::Gui::Printing;
 use AMC::Gui::ProjectManager;
+use AMC::Gui::RenameSource;
 use AMC::Gui::SelectStudents;
 use AMC::Gui::Strategy;
 use AMC::Gui::StudentsList;
@@ -1488,14 +1489,19 @@ sub set_source_tex {
     $self->valide_source_tex();
 }
 
+sub display_source_path {
+    my ($self) = @_;
+    $self->get_ui('button_edit_src')
+        ->set_tooltip_text(
+        glib_filename( $self->get_absolute('texsrc') ) );
+}
+
 sub valide_source_tex {
     my ($self) = @_;
 
     debug "* valide_source_tex";
 
-    $self->get_ui('button_edit_src')
-      ->set_tooltip_text(
-        glib_filename( $self->get_absolute('texsrc') ) );
+    $self->display_source_path();
 
     if ( !$self->get('filter') ) {
         $self->set( 'filter',
@@ -1667,12 +1673,33 @@ sub filter_changed {
         $self->set( 'project:texsrc',
             '%PROJET/'
               . ( "AMC::Filter::register::" . $self->get('filter') )
-              ->default_filename() );
-        $self->get_ui('button_edit_src')
-          ->set_tooltip_text(
-            glib_filename( $self->get_absolute('texsrc') ) );
+                    ->default_filename() );
+        $self->display_source_path();
     }
 
+}
+
+sub move_source_file {
+    my ($self) = @_;
+
+    my $path = AMC::Gui::RenameSource->new(
+        parent_window  => $self->get_ui('main_window'),
+        config         => $self->{config},
+        );
+
+    if($path) {
+        my $error = $self->{project}->move_source($path);
+        if($error) {
+            my $dialog = Gtk3::MessageDialog->new( $self->get_ui('main_window'),
+                'destroy-with-parent', 'error', 'ok', '' );
+            $dialog->set_markup( ( __ "The source file could not be renamed:" )
+                . " <b>$error</b>" );
+            $dialog->run;
+            $dialog->destroy;
+        } else {
+            $self->display_source_path();
+        }
+    }
 }
 
 my %component_name = (

@@ -24,6 +24,7 @@ use 5.012;
 package AMC::Project;
 
 use File::Temp qw/ tempfile tempdir :seekable /;
+use File::Copy;
 
 use AMC::Basic;
 use AMC::Data;
@@ -142,6 +143,23 @@ sub open {
 
     $self->{_students_list} = AMC::NamesFile::new();
 
+}
+
+sub move_source {
+    my ( $self, $new_path ) = @_;
+    my $from = $self->{config}->get_absolute('project:texsrc');
+    if ( -e $new_path ) {
+        return ( __ "This file already exists" );
+    }
+    if ( move( $from, $new_path ) ) {
+        $self->{config}->set( 'project:texsrc',
+            $self->{config}->{shortcuts}->relatif_base($new_path) );
+        $self->{config}->save();
+        return (0);
+    }
+    else {
+        return ("ERROR: $!");
+    }
 }
 
 sub close {
