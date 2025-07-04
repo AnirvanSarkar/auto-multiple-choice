@@ -65,7 +65,7 @@ BEGIN {
           &blob_to_file &amc_component &annotate_source_change &join_nonempty &printable
           &string_to_usascii &string_to_filename &show_utf8 &path_to_filename &free_disk_mo
           &dir_contents_u &clean_gtk_filenames &glib_filename &n_fich &unzip_to_temp
-          &split_project_dir &GetProjectOptions );
+          &split_project_dir &GetProjectOptions &get_extension);
     %EXPORT_TAGS = ();    # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -1201,6 +1201,15 @@ sub dir_contents_u {
     } else {
         debug_and_stderr("Error opening directory $dir: $!");
         return ();
+    }
+}
+
+sub get_extension {
+    my ($path) = @_;
+    if($path =~ /(\.[a-zA-Z0-9]+)$/) {
+        return($1);
+    } else {
+        return("");
     }
 }
 

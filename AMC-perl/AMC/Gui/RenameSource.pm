@@ -76,7 +76,6 @@ sub dialog {
         if($self->get('ascii_filenames')) {
             $new_filename = string_to_usascii($new_filename);
         }
-        $new_filename = $self->absolu('%PROJET/') . $new_filename;
         return($new_filename);
     } else{
         return();

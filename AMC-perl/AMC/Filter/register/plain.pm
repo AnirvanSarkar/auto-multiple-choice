@@ -42,6 +42,10 @@ sub default_filename {
     return ("source.txt");
 }
 
+sub file_extension {
+    return (".txt");
+}
+
 sub default_content {
     my ( $self, $file ) = @_;
     open( EMPTY, ">", $file );

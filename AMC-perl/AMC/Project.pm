@@ -148,18 +148,27 @@ sub open {
 sub move_source {
     my ( $self, $new_path ) = @_;
     my $from = $self->{config}->get_absolute('project:texsrc');
+    if ( $new_path eq "" ) {
+        return ( __ "Empty file name" );
+    }
+    if ( $new_path !~ /\// ) {
+        $new_path = $self->project_dir() . "/" . $new_path;
+    }
     if ( -e $new_path ) {
         return ( __ "This file already exists" );
     }
-    if ( move( $from, $new_path ) ) {
+    my $error = "";
+    if ( -f $from ) {
+        if ( !move( $from, $new_path ) ) {
+            $error = "ERROR: $!";
+        }
+    }
+    if ( !$error ) {
         $self->{config}->set( 'project:texsrc',
             $self->{config}->{shortcuts}->relatif_base($new_path) );
         $self->{config}->save();
-        return (0);
     }
-    else {
-        return ("ERROR: $!");
-    }
+    return ($error);
 }
 
 sub close {

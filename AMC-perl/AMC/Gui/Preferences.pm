@@ -144,7 +144,17 @@ sub stores {
         encodage_latex => cb_model(
             map { $_->{iso} => $_->{txt} } (AMC::Encodings::encodings())
         ),
-
+        src_filename => cb_model(
+            # TRANSLATORS: One option for source file name when
+            # creating new project: don't change it
+            free    => __("Free (no change)"),
+            # TRANSLATORS: One option for source file name when
+            # creating new project: always name it "source"
+            fixed   => __("Fixed (always \"source\")"),
+            # TRANSLATORS: One option for source file name when
+            # creating new project: use the project name
+            project => __("Project (from project name)"),
+          ),
         delimiteur_decimal => cb_model(
             ',',
             __(

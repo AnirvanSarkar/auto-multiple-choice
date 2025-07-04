@@ -270,6 +270,7 @@ sub defaults {
           "MC-Projects",
         projects_home => $self->{home_dir} . '/' . __ "MC-Projects",
         rep_modeles   => $self->{o_dir} . "/Models",
+        src_filename  => 'free',
 
         seuil_eqm               => 3.0,
         seuil_sens              => 8.0,

@@ -44,6 +44,10 @@ sub default_filename {
     return ("source.tex");
 }
 
+sub file_extension {
+    return (".tex");
+}
+
 sub default_content {
     my ( $self, $file ) = @_;
     open( EMPTY, ">", $file );

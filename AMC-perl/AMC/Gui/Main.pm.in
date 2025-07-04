@@ -1308,12 +1308,36 @@ sub source_latex_choisir {
     return ( $create->install_source(%oo) );
 }
 
+sub new_source_filename {
+    my ( $self, $force ) = @_;
+    my $s           = $self->get("src_filename");
+    my $srcfilename = "";
+    my $filter      = $self->get('filter');
+    my $ext         = "";
+    if ($filter) {
+        $ext = ( "AMC::Filter::register::" . $filter )->file_extension();
+    }
+    if ( $s eq "fixed" ) {
+        $srcfilename = "source" . $ext;
+    } elsif ( $s eq "project" ) {
+        $srcfilename = $self->{project}->name . $ext;
+    } elsif ($force) {
+        if ($filter) {
+            $srcfilename = ( "AMC::Filter::register::" . $filter )
+              ->default_filename();
+        } else {
+            $srcfilename = "source";
+        }
+    }
+    return ($srcfilename);
+}
+
 # Open project.
 #
-# if $deja, then the project is a new project to be created.
+# if $new_project, then the project is a new project to be created.
 
 sub projet_ouvre {
-    my ( $self, $proj, $deja ) = (@_);
+    my ( $self, $proj, $new_project ) = (@_);
 
     my $new_source = 0;
 
@@ -1323,7 +1347,7 @@ sub projet_ouvre {
 
     $self->quitte_projet();
 
-    if ($deja) {
+    if ($new_project) {
 
         # Select/create the source file
 
@@ -1334,8 +1358,6 @@ sub projet_ouvre {
         }
         if ( $ok == 1 ) {
             $new_source = 1;
-        } elsif ( $ok == 2 ) {
-            $deja = '';
         }
     }
 
@@ -1348,6 +1370,14 @@ sub projet_ouvre {
     $self->valide_projet();
 
     $self->set_source_tex(1) if ($new_source);
+
+    if ($new_project) {
+        my $new_srcfilename = $self->new_source_filename();
+        if ($new_srcfilename) {
+            $self->{project}->move_source($new_srcfilename);
+            $self->display_source_path();
+        }
+    }
 
     $self->cursor_standard;
 
@@ -1671,9 +1701,7 @@ sub filter_changed {
         || -z $self->get_absolute('texsrc') )
     {
         $self->set( 'project:texsrc',
-            '%PROJET/'
-              . ( "AMC::Filter::register::" . $self->get('filter') )
-                    ->default_filename() );
+            '%PROJET/' . $self->new_source_filename(1) );
         $self->display_source_path();
     }
 

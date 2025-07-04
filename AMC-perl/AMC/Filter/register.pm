@@ -51,6 +51,11 @@ sub default_filename {
     return ("source");
 }
 
+# default filename extension
+sub file_extension {
+    return ("");
+}
+
 # create new empty file
 sub default_content {
     my ( $self, $file ) = @_;
