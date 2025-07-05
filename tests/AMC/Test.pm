@@ -1127,11 +1127,12 @@ sub check_export_csv {
             {
                 local $ENV{LANG} = 'C';
                 $ok =
-                  run( ["unoconv", "-T", 120, "-f", "csv", "$self->{temp_dir}/export.ods"],
-                    '2>>', '/dev/null' );
+                    run(["libreoffice", "--convert-to", "csv:Text - txt - csv (StarCalc):44,34,UTF8", "--outdir", "$self->{temp_dir}", "$self->{temp_dir}/export.ods" ],
+                        '>>', $self->{debug_file},
+                        '2>>', $self->{debug_file} );
             }
             if ( !$ok ) {
-                $self->trace("[E] Command `unoconv' returned with $?");
+                $self->trace("[E] Command `libreoffice' returned with $?");
                 $self->failed(1);
             }
             $skip_lines = 2;
