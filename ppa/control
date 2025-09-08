@@ -5,9 +5,9 @@ Maintainer: Alexis Bienvenüe <pado@passoire.fr>
 Uploaders: Georges Khaznadar <georgesk@debian.org>
 Build-Depends: debhelper (>= 10), xsltproc,
  librsvg2-bin, netpbm,
- pkg-config, libopencv-dev,
+ pkgconf, libopencv-dev,
  libpoppler-glib-dev, libcairo2-dev, libpango1.0-dev,
- texlive-latex-base, texlive-latex-extra, texlive-pictures
+ texlive-latex-base, texlive-latex-extra, texlive-pictures, tex-common
 Standards-Version: 3.9.4
 Homepage: http://www.auto-multiple-choice.net/
 Vcs-Browser: https://gitlab.com/a10684/auto-multiple-choice/
@@ -19,7 +19,6 @@ Replaces: auto-multiple-choice-common (<< 1.3.0-1)
 Breaks: auto-multiple-choice-common (<< 1.3.0-1)
 Depends: ${misc:Depends}, ${shlibs:Depends},
  auto-multiple-choice-common (= ${source:Version})
-Recommends: auto-multiple-choice-doc (= ${source:Version})
 Suggests: texstudio | texmaker | kile, libreoffice-calc
 Description: Auto Multiple Choice - multiple choice papers management
  Utility to manage multiple choice questionnaires, with optionally
