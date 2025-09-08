@@ -77,20 +77,19 @@ print-%: FORCE
 
 BINARIES ?= AMC-detect AMC-buildpdf AMC-pdfformfields
 
-STY=doc/sty/automultiplechoice.sty
-DTX=doc/sty/automultiplechoice.dtx
+STY=tex/automultiplechoice.sty
+DTX=tex/automultiplechoice.dtx
 MOS=$(wildcard I18N/lang/*.mo)
 LANGS=$(notdir $(basename $(MOS)))
-SUBMODS=$(notdir $(shell ls doc/modeles))
+SUBMODS=$(notdir $(shell find models -mindepth 1 -maxdepth 1 -type d))
 MODS_IN=$(wildcard AMC-*.pl.in)
 MODS=$(MODS_IN:.pl.in=.pl)
 GLADE_IN=$(wildcard AMC-perl/AMC/Gui/*.glade.in)
-DOC_XML_IN=$(wildcard doc/auto-multiple-choice.*.in.xml)
 PYCACHE=tests/gui/dogtail/__pycache__
 
 # list *.in files for @/VAR/@ substitution
 
-FROM_IN=auto-multiple-choice net.auto_multiple_choice.amc.desktop $(MODS) AMC-perl/AMC/Basic.pm AMC-perl/AMC/Gui/Main.pm $(GLADE_IN:.glade.in=.glade) doc/doc-xhtml-site.fr.xsl doc/doc-xhtml-site.ja.xsl doc/doc-xhtml-site.en.xsl doc/amcdocstyle.sty doc/doc-xhtml.xsl $(DOC_XML_IN:.in.xml=.xml) $(DTX)
+FROM_IN=auto-multiple-choice net.auto_multiple_choice.amc.desktop $(MODS) AMC-perl/AMC/Basic.pm AMC-perl/AMC/Gui/Main.pm $(GLADE_IN:.glade.in=.glade) $(DTX)
 
 # Is this a precomp tarball? If so, the PRECOMP file is present.
 
@@ -115,7 +114,7 @@ endif
 ifeq ($(PRECOMP_ARCHIVE),)
 all:
 	$(MAKE) $(FROM_IN)
-	$(MAKE) $(BINARIES) $(MAIN_LOGO).xpm $(MAIN_LOGO).svgz doc I18N
+	$(MAKE) $(BINARIES) $(MAIN_LOGO).xpm $(MAIN_LOGO).svgz sty models I18N
 	chmod a+x auto-multiple-choice
 else
 all: all_precomp
@@ -149,7 +148,6 @@ vars-subs.pl: $(SUB_MAKEFILES) authors-subs.xsl authors.xml
 	$(file > $@,# Variables:)
 	$(foreach varname,$(SUBST_VARS), $(file >> $@,s|@/$(varname)/@|$($(varname))|g;) )
 	$(foreach varname,$(SUBST_VARS_FOR_TEX), $(file >> $@,s|@/$(varname)_TEX/@|$(subst ~,\\string~,$($(varname)))|g;) )
-	$(file >> $@,s+/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd+$(DOCBOOK_DTD)+g;)
 	$(file >> $@,# From authors.xml:)
 	xsltproc --nonet authors-subs.xsl authors.xml >> $@
 
@@ -161,9 +159,11 @@ vars-subs.pl: $(SUB_MAKEFILES) authors-subs.xsl authors.xml
 
 # some components
 
-doc:
-	$(MAKE) -C doc
-	$(MAKE) -C doc/sty
+sty:
+	$(MAKE) -C tex
+
+models:
+	$(MAKE) -C models
 
 I18N:
 	$(MAKE) -C I18N
@@ -207,8 +207,8 @@ clean: clean_IN $(if $(PRECOMP_ARCHIVE),,distclean)
 distclean: clean_IN clean
 	-rm -f $(MAIN_LOGO).xpm $(MAIN_LOGO).svgz $(MAIN_LOGO)-*.png
 	-rm -f auto-multiple-choice.spec
-	$(MAKE) -C doc/sty clean
-	$(MAKE) -C doc clean
+	$(MAKE) -C tex clean
+	$(MAKE) -C models clean
 	$(MAKE) -C I18N clean
 
 # INSTALL
@@ -221,8 +221,8 @@ install_lang: $(addprefix install_lang_,$(LANGS)) ;
 
 install_models_%: FORCE
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MODELSDIR)/$*
-	-install    -m 0644 $(USER_GROUP) doc/modeles/$*/*.tgz $(DESTDIR)/$(MODELSDIR)/$*
-	-install    -m 0644 $(USER_GROUP) doc/modeles/$*/*.xml $(DESTDIR)/$(MODELSDIR)/$*
+	-install    -m 0644 $(USER_GROUP) models/$*/*.tgz $(DESTDIR)/$(MODELSDIR)/$*
+	-install    -m 0644 $(USER_GROUP) models/$*/*.xml $(DESTDIR)/$(MODELSDIR)/$*
 
 install_models: $(addprefix install_models_,$(SUBMODS)) ;
 
@@ -297,22 +297,11 @@ install_doc: FORCE
 	@echo "Installing doc..."
 ifneq ($(TEXDOCDIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(TEXDOCDIR)
-	install    -m 0644 $(USER_GROUP) doc/sty/*.pdf doc/sty/*.tex $(DESTDIR)/$(TEXDOCDIR)
+	install    -m 0644 $(USER_GROUP) tex/*.pdf tex/*.tex $(DESTDIR)/$(TEXDOCDIR)
 endif
 ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_install{doc,man}
-	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(DOCDIR)
-	install    -m 0644 $(USER_GROUP) $(wildcard doc/auto-multiple-choice.??.xml doc/auto-multiple-choice.??.pdf) $(DESTDIR)/$(DOCDIR)
-	cp -r doc/html $(DESTDIR)/$(DOCDIR)
-ifeq ($(INSTALL_USER),)
-else
-	chown -hR $(INSTALL_USER) $(DESTDIR)/$(DOCDIR)
-endif
-ifeq ($(INSTALL_GROUP),)
-else
-	chgrp -hR $(INSTALL_GROUP) $(DESTDIR)/$(DOCDIR)
-endif
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(MAN1DIR)
-	install    -m 0644 $(USER_GROUP) doc/*.1 $(DESTDIR)/$(MAN1DIR)
+	install    -m 0644 $(USER_GROUP) man/*.1 $(DESTDIR)/$(MAN1DIR)
 endif
 
 install: install_nodoc install_doc ;
@@ -320,7 +309,7 @@ install: install_nodoc install_doc ;
 ######################################################################################
 
 FILES_ICONS=$(notdir $(wildcard icons/*.svg))
-FILES_TEXDOC=$(notdir $(wildcard doc/sty/*.pdf doc/sty/*.tex))
+FILES_TEXDOC=$(notdir $(wildcard tex/*.pdf tex/*.tex))
 
 uninstall_lang: FORCE
 	-rm $(DESTDIR)/$(LOCALEDIR)/*/LC_MESSAGES/auto-multiple-choice.mo
@@ -374,10 +363,6 @@ ifneq ($(TEXDOCDIR),)
 	rmdir $(DESTDIR)/$(TEXDOCDIR) || echo "Directory $(DESTDIR)/$(TEXDOCDIR) not empty..."
 endif
 ifneq ($(SYSTEM_TYPE),deb) # with debian, done with dh_install{doc,man}
-	-rm $(DESTDIR)/$(DOCDIR)/auto-multiple-choice.??.xml
-	-rm $(DESTDIR)/$(DOCDIR)/auto-multiple-choice.??.pdf
-	-rm -r $(DESTDIR)/$(DOCDIR)/html
-	rmdir $(DESTDIR)/$(DOCDIR) || echo "Directory $(DESTDIR)/$(DOCDIR) not empty..."
 	-rm $(DESTDIR)/$(MAN1DIR)/auto-multiple-choice*.1
 endif
 
@@ -404,8 +389,7 @@ global: FORCE
 		$(APPICONDIR)/scalable/apps/auto-multiple-choice.svgz \
 		$(foreach SIZE, $(APPICONSIZES), \
 			$(APPICONDIR)/$(SIZE)x$(SIZE)/apps/auto-multiple-choice.png )
-	-sudo rm -r /usr/lib/AMC /usr/share/auto-multiple-choice /usr/share/perl5/AMC \
-		/usr/share/doc/auto-multiple-choice*
+	-sudo rm -r /usr/lib/AMC /usr/share/auto-multiple-choice /usr/share/perl5/AMC
 
 local: global
 	$(MAKE) -C I18N local LOCALEDIR=$(LOCALEDIR) LOCALDIR=$(LOCALDIR)
@@ -422,9 +406,8 @@ local: global
 	sudo ln -s $(LOCALDIR)/AMC-*.pl $(LOCALDIR)/AMC-*.glade /usr/lib/AMC/perl
 	sudo ln -s $(LOCALDIR)/auto-multiple-choice /usr/bin
 	sudo ln -s $(LOCALDIR)/icons $(ICONSDIR)
-	sudo ln -s $(LOCALDIR)/doc /usr/share/doc/auto-multiple-choice-doc
 	sudo ln -s $(LOCALDIR)/net.auto_multiple_choice.amc.desktop $(DESKTOPDIR)/net.auto_multiple_choice.amc.desktop
-	sudo ln -s $(LOCALDIR)/doc/modeles $(MODELSDIR)
+	sudo ln -s $(LOCALDIR)/models $(MODELSDIR)
 	sudo ln -s $(LOCALDIR)/$(STY) $(TEXDIR)/automultiplechoice.sty
 	sudo ln -s $(LOCALDIR)/interfaces/amc-txt.lang $(LANG_GTKSOURCEVIEW_DIR)
 	sudo ln -s $(LOCALDIR)/interfaces/auto-multiple-choice.xml $(SHARED_MIMEINFO_DIR)
@@ -480,7 +463,7 @@ sources_vok:
 	$(MAKE) tmp_copy
 	cd $(TMP_DIR) ; tar cvzf auto-multiple-choice_$(PACKAGE_V_DEB)_sources.tar.gz $(SRC_EXCL) $(SOURCE_DIR)
 	$(MAKE) -C $(TMP_SOURCE_DIR) MAJ
-	$(MAKE) -C $(TMP_SOURCE_DIR) $(MAIN_LOGO).xpm $(MAIN_LOGO).svgz I18N doc
+	$(MAKE) -C $(TMP_SOURCE_DIR) $(MAIN_LOGO).xpm $(MAIN_LOGO).svgz I18N models sty
 	$(MAKE) -C $(TMP_SOURCE_DIR) clean_IN
 	$(MAKE) -C $(TMP_SOURCE_DIR) auto-multiple-choice.spec
 	touch $(TMP_SOURCE_DIR)/$(PRECOMP_FLAG_FILE)
@@ -524,6 +507,6 @@ re_unstable:
 
 FORCE: ;
 
-.PHONY: all all_precomp install version_files deb deb_vok debsrc debsrc_vok sources sources_vok clean clean_IN global local doc I18N tmp_copy tmp_deb unstable re_unstable FORCE MAJ manual-test
+.PHONY: all all_precomp install version_files deb deb_vok debsrc debsrc_vok sources sources_vok clean clean_IN global local models tex I18N tmp_copy tmp_deb unstable re_unstable FORCE MAJ manual-test
 
 

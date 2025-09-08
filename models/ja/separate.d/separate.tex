@@ -1,0 +1,109 @@
+\documentclass[a4paper]{article}
+
+\usepackage[box,completemulti,separateanswersheet,lang=JA]{automultiplechoice}    
+\begin{document}
+
+\AMCrandomseed{1237893}
+
+\def\AMCformQuestion#1{{\sc 問 #1:}}    
+
+\setdefaultgroupmode{withoutreplacement}
+
+\element{general}{
+  \begin{question}{総理大臣}
+    次のうち、日本の総理大臣になったことがある人を一人選びなさい。
+    \begin{choices}
+      \correctchoice{大隈重信}
+      \wrongchoice{湯川秀樹}
+      \wrongchoice{聖徳太子}
+      \wrongchoice{徳川家康}
+    \end{choices}
+  \end{question}
+}
+
+\element{general}{
+  \begin{questionmult}{都道府県}
+    次のうち、日本の都道府県はどれか、すべて選びなさい。
+    \begin{choices}
+      \correctchoice{石川}
+      \wrongchoice{山田}
+      \correctchoice{宮崎}
+    \end{choices}
+  \end{questionmult}
+}
+
+\element{general}{
+  \begin{question}{EU}
+    欧州連合には2009年1月現在、何ヶ国が加盟していますか？
+    \begin{choiceshoriz}[o]
+      \wrongchoice{15}
+      \wrongchoice{21}
+      \wrongchoice{25}
+      \correctchoice{27}
+      \wrongchoice{31}
+    \end{choiceshoriz}
+  \end{question}
+}
+
+\onecopy{5}{    
+
+%%% 試験問題用紙ヘッダー開始:
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+  \centering\large\bf テスト\\ 試験日 2008年1月1日
+\end{minipage}
+
+\begin{center}\em
+試験時間 : 10 分。
+
+  資料の持込みと電子計算機の使用は禁じます。
+
+  \multiSymbole{}の記号のある設問の正解は1個とは限りません。
+  0個の場合や複数の場合があります。
+
+  それ以外の設問には正解が1個だけあります。
+
+  \emph{非常に悪い解答}にはマイナス点がつくことがあります。
+
+\end{center}
+\vspace{1ex}
+
+%%% ヘッダー終了
+
+\insertgroup{general}
+
+\AMCcleardoublepage    
+
+% \AMCaddpagesto{3} 
+
+\AMCformBegin    
+
+%%% 答案用紙ヘッダー開始
+
+{\large\bf Answer sheet:}
+\hfill \namefield{\fbox{    
+    \begin{minipage}{.5\linewidth}
+      氏名:
+      
+      \vspace*{.5cm}\dotfill
+      \vspace*{1mm}
+    \end{minipage}
+  }}
+
+\begin{center}
+  \bf\em 解答はこの用紙にのみ行わなければなりません:
+  他の用紙に行った解答は無視されます。
+\end{center}
+
+%%% 答案用紙ヘッダー終了
+
+\AMCform    
+
+% \AMCaddpagesto{5} 
+
+}  
+
+\end{document}

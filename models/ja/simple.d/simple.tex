@@ -1,0 +1,66 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}    
+\usepackage[T1]{fontenc}
+
+\usepackage[box,completemulti,lang=JA]{automultiplechoice}    
+\begin{document}
+
+\onecopy{10}{    
+
+%%% 試験問題用紙ヘッダー開始:    
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf テスト\\ 試験日 2008年1月1日\end{minipage}
+\namefield{\fbox{    
+                \begin{minipage}{.5\linewidth}
+                  氏名:
+
+                  \vspace*{.5cm}\dotfill
+                  \vspace*{1mm}
+                \end{minipage}
+         }}
+
+\begin{center}
+試験時間 : 10 分。
+
+  資料の持込みと電子計算機の使用は禁じます。
+
+  \multiSymbole{}の記号のある設問の正解は1個とは限りません。
+  0個の場合や複数の場合があります。
+
+  それ以外の設問には正解が1個だけあります。
+
+  \emph{非常に悪い解答}にはマイナス点がつくことがあります。
+\end{center}
+\vspace{1ex}
+
+%%% ヘッダー終了
+
+\begin{question}{総理大臣}    
+  次のうち、日本の総理大臣になったことがある人を一人選びなさい。
+  \begin{choices}
+    \correctchoice{大隈重信}
+    \wrongchoice{湯川秀樹}
+    \wrongchoice{聖徳太子}
+    \wrongchoice{徳川家康}
+  \end{choices}
+\end{question}
+
+\begin{questionmult}{都道府県}    
+  次のうち、日本の都道府県はどれか、すべて選びなさい。
+  \begin{choices}
+    \correctchoice{石川}
+    \wrongchoice{山田}
+    \correctchoice{宮崎}
+  \end{choices}
+\end{questionmult}
+
+% \AMCaddpagesto{3} 
+
+}   
+
+\end{document}
