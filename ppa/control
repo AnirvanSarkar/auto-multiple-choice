@@ -3,19 +3,15 @@ Section: education
 Priority: optional
 Maintainer: Alexis Bienvenüe <pado@passoire.fr>
 Uploaders: Georges Khaznadar <georgesk@debian.org>
-Build-Depends: debhelper (>= 10), gettext,
- libxml-libxml-perl, dblatex, xsltproc, docbook-xml,
- docbook-xsl, librsvg2-bin, netpbm, texlive-pictures,
+Build-Depends: debhelper (>= 10), xsltproc,
+ librsvg2-bin, netpbm,
  pkg-config, libopencv-dev,
  libpoppler-glib-dev, libcairo2-dev, libpango1.0-dev,
- fonts-ipaexfont-gothic, fonts-ipaexfont-mincho, fonts-ipafont-gothic,
- fonts-ipafont-mincho, fonts-dejavu,
- texlive-latex-recommended, texlive-xetex, lmodern,
- texlive-lang-french, texlive-lang-japanese, texlive-lang-chinese
+ texlive-latex-base, texlive-latex-extra, texlive-pictures
 Standards-Version: 3.9.4
 Homepage: http://www.auto-multiple-choice.net/
-Vcs-Browser: https://gitlab.com/jojo_boulix/auto-multiple-choice/
-Vcs-Git: https://gitlab.com/jojo_boulix/auto-multiple-choice.git
+Vcs-Browser: https://gitlab.com/a10684/auto-multiple-choice/
+Vcs-Git: https://gitlab.com/a10684/auto-multiple-choice.git
 
 Package: auto-multiple-choice
 Architecture: any
@@ -57,27 +53,3 @@ Description: Auto Multiple Choice - architecture independent files
  LibreOffice sheet file.
  .
  These are architecture independent files.
-
-Package: auto-multiple-choice-doc
-Architecture: all
-Section: doc
-Depends: ${misc:Depends}
-Description: Auto Multiple Choice - HTML documentation
- Utility to manage multiple choice questionnaires, with optionally
- mixed questions and answers. AMC provides automatic marking from papers'
- scans. Annotated papers are produced. Marks can be exported as a
- LibreOffice sheet file.
- .
- This is AMC HTML documentation.
-
-Package: auto-multiple-choice-doc-pdf
-Architecture: all
-Section: doc
-Depends: ${misc:Depends}
-Description: Auto Multiple Choice - PDF documentation
- Utility to manage multiple choice questionnaires, with optionally
- mixed questions and answers. AMC provides automatic marking from papers'
- scans. Annotated papers are produced. Marks can be exported as a
- LibreOffice sheet file.
- .
- This is AMC PDF documentation.

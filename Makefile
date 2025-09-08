@@ -493,6 +493,9 @@ deb_vok: tmp_deb
 	cd $(TMP_SOURCE_DIR) ; dpkg-buildpackage -b $(BUILDOPTS) $(MORE_BUILDOPTS)
 	rm -rf $(TMP_SOURCE_DIR)
 
+deb_pbuilder: debsrc
+	cd $(TMP_DIR) ; sudo pbuilder --build --debbuildopts -b auto-multiple-choice_$(PACKAGE_V_DEB)-1.dsc
+
 # % : make sure version_files are rebuilt before calling target %_vok
 
 $(foreach key,deb debsrc sources ssources portable,$(eval $(key): clean version_files ; $$(MAKE) $(key)_vok))
