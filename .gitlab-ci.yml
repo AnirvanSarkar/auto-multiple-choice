@@ -3,6 +3,7 @@ stages:
   - build
   - test
   - package
+  - packagetest
 
 build:
   stage: build
@@ -120,7 +121,6 @@ pack-ppa:
       - "auto-multiple-choice*_*"
     exclude:
       - "auto-multiple-choice-build-deps*"
-  allow_failure: true
 
 pack-debian:
   stage: package
@@ -154,3 +154,23 @@ pack-debian:
     exclude:
       - "debian-package/auto-multiple-choice-build-deps*"
   allow_failure: true
+
+test-ppa:
+  stage: packagetest
+  needs:
+    - job: pack-ppa
+      artifacts: true
+  image: debian:testing-slim
+  before_script:
+    - apt update
+    - apt install -y xvfb xauth at-spi2-core gir1.2-notify-0.7 python3-dogtail libglib2.0-bin
+  script:
+    - apt install -y ./auto-multiple-choice_*.deb ./auto-multiple-choice-common_*.deb
+    - cd tests/gui/dogtail
+    - ./blind-tests.sh simple postcorrect utf8
+    - apt install -y texlive-lang-french
+    - ./blind-tests.sh template template-2
+    - apt install -y sqlite3
+    - ./blind-tests.sh manual
+    - apt install -y gedit
+    - ./blind-tests.sh pdfform
