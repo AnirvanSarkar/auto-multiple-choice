@@ -700,7 +700,7 @@ sub needs_extract_with {
 "You selected the '%s' option, but this option needs %s"." to be installed on your system. Please install one of these and try again."
                     ),
                     $option_name,
-                    $self->say_all( "'", @allowed )
+                    $self->all_quoted( "'", @allowed )
                 )
             );
             $dialog->run;
