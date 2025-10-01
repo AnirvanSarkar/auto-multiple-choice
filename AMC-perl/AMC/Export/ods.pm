@@ -1551,14 +1551,14 @@ sub export {
                     ? "(" . $notemax . "-" . $notenull . ")"
                     : $notemax
                   )
-                  . "/$grain)*$grain"
+                  . "/$grain;0)*$grain"
                   . ( $plafond       ? ")"             : "" )
                   . ( $notemin ne '' ? ")"             : "" ) . ";"
                   . ( $notemin ne '' ? "MAX($notemin;" : "" )
                   . ( $notenull      ? $notenull . "+" : "" )
                   . "$arrondi([."
                   . yx2ooo( $jj, $code_col{total} )
-                  . "]/$grain)*$grain"
+                  . "]/$grain;0)*$grain"
                   . ( $notemin ne '' ? ")" : "" ) . ")"
             );
         }
