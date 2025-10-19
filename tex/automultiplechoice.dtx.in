@@ -5422,12 +5422,23 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 %\fi
 %
 %    \begin{macrocode}
+\def\AMC@randomseeds@#1{%
+  \ifx\pgfmath@rnd@z\undefined\relax
+    \AMCmessage{VAR:pgfseed:#1=NONE}%
+  \else%
+    \pgfmathparse{\pgfmath@rnd@z}%
+    \AMCmessage{VAR:pgfseed:#1=\pgfmathresult}%
+  \fi%
+}
+\def\AMC@randomseeds#1{%
+  \AtBeginDocument{\AMC@randomseeds@{#1}}%
+}
 \ifx\SujetExterne\undefined\else
-\message{***SUJET***^^J}
+\message{***SUJET***^^J}\AMC@randomseeds{subject}
 \AMC@catalogfalse\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse
 \fi
 \ifx\ScoringExterne\undefined\else
-\message{***SCORING***^^J}
+\message{***SCORING***^^J}\AMC@randomseeds{scoring}
 \AMC@catalogfalse\AMC@calibrationtrue\AMC@correcfalse\AMC@correcheadfalse\AMC@watermarkfalse\AMC@invisibletrue
 \fi
 \ifx\CorrigeExterne\undefined\else
@@ -5435,7 +5446,7 @@ pdflatex '\nonstopmode\def\SujetExterne{1}\def\NoWatermarkExterne{1}\input{mcq.t
 \AMC@catalogfalse\AMC@calibrationfalse\AMC@correcheadtrue\AMC@correctrue\AMC@watermarkfalse
 \fi
 \ifx\CorrigeIndivExterne\undefined\else
-\message{***CORRIGE***^^J}
+\message{***CORRIGE***^^J}\AMC@randomseeds{indivanswer}
 \AMC@catalogfalse\AMC@calibrationtrue\AMC@correcheadfalse\AMC@correctrue\AMC@watermarkfalse
 \fi
 \ifx\CatalogExterne\undefined\else
