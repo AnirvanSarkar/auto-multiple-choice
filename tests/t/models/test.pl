@@ -33,7 +33,7 @@ my $cwd = getcwd();
 my ( $script_volume, $script_directory, undef ) =
   File::Spec->splitpath(__FILE__);
 chdir( File::Spec->catpath( $script_volume, $script_directory ) );
-my $models_base = abs_path("../../../doc/modeles");
+my $models_base = abs_path("../../../models");
 chdir($cwd);
 
 my $errors = 0;

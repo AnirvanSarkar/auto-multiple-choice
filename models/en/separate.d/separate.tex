@@ -1,0 +1,111 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[box,completemulti,separateanswersheet]{automultiplechoice}    
+\begin{document}
+
+\AMCrandomseed{1237893}
+
+\def\AMCformQuestion#1{{\sc Question #1:}}    
+
+\setdefaultgroupmode{withoutreplacement}
+
+\element{general}{
+  \begin{question}{prez}
+    Among the following persons, which one has ever been a President of the French Republic?
+    \begin{choices}
+      \correctchoice{René Coty}
+      \wrongchoice{Alain Prost}
+      \wrongchoice{Marcel Proust}
+      \wrongchoice{Claude Monet}
+    \end{choices}
+  \end{question}
+}
+
+\element{general}{
+  \begin{questionmult}{pref}
+    Among the following cities, which ones are French prefectures?
+    \begin{choices}
+      \correctchoice{Poitiers}
+      \wrongchoice{Sainte-Menehould}
+      \correctchoice{Avignon}
+    \end{choices}
+  \end{questionmult}
+}
+
+\element{general}{
+  \begin{question}{nb-ue}
+    How many different states were members of the European Union in Jan. 2009?
+    \begin{choiceshoriz}[o]
+      \wrongchoice{15}
+      \wrongchoice{21}
+      \wrongchoice{25}
+      \correctchoice{27}
+      \wrongchoice{31}
+    \end{choiceshoriz}
+  \end{question}
+}
+
+\onecopy{5}{
+
+%%% beginning of the test sheet header:
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+  \centering\large\bf Test\\ Examination on Jan. 1st, 2008
+\end{minipage}
+
+\begin{center}\em
+Duration : 10 minutes.
+
+  No documents allowed. The use of electronic calculators is forbidden.
+
+  Questions using the sign \multiSymbole{} may have
+  zero, one or several correct answers.  Other questions have a single correct answer.
+
+  Negative points may be attributed to \emph{very
+    bad} answers.
+
+\end{center}
+\vspace{1ex}
+
+%%% end of the header
+
+\insertgroup{general}
+
+\AMCcleardoublepage    
+
+% \AMCaddpagesto{3} 
+
+\AMCformBegin    
+
+%%% beginning of the answer sheet header
+
+{\large\bf Answer sheet:}
+\hfill \namefield{\fbox{    
+    \begin{minipage}{.5\linewidth}
+      Firstname and lastname:
+
+      \vspace*{.5cm}\namefielddots  
+      \vspace*{1mm}
+    \end{minipage}
+  }}
+
+\begin{center}
+  \bf\em Answers must be given exclusively on this sheet:
+  answers given on the other sheets will be ignored.
+\end{center}
+
+%%% end of the answer sheet header
+
+\AMCform    
+
+% \AMCaddpagesto{5} 
+
+}
+
+\end{document}

@@ -908,9 +908,9 @@ sub activate_doc {
         }
     }
 
-    my $url = 'file://' . $hdocdir;
-    $url .= "auto-multiple-choice.$lang/index.html"
-      if ( $lang && -f $hdocdir . "auto-multiple-choice.$lang/index.html" );
+    my $url = 'https://www.auto-multiple-choice.net/';
+    $url .= "$lang/" if($lang ne 'en');
+    $url .= "doc";
 
     my $seq = 0;
     my @c   = map { $seq += s/[%]u/$url/g; $_; }

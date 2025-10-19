@@ -1,0 +1,110 @@
+\documentclass{article}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[box,completemulti,lang=JA]{automultiplechoice}
+
+\begin{document}
+
+\element{qqs}{
+\begin{question}{good choice}
+  この設問に何点欲しいですか？
+  \begin{choices}
+    \correctchoice{満点: 10}\scoring{10}
+    \wrongchoice{5点だけ欲しい}\scoring{5}
+    \wrongchoice{2点でよい}\scoring{2}
+    \wrongchoice{いらない}\scoring{0}
+  \end{choices}
+\end{question}
+}
+
+\element{qqs}{
+\begin{questionmult}{added}
+  次のボックスをマークしてポイントをゲット:
+  \begin{choices}
+    \correctchoice{2点}\scoring{b=2}
+    \wrongchoice{マイナス1点!}\scoring{b=0,m=-1}
+    \correctchoice{3点}\scoring{b=3}
+    \correctchoice{1点}
+    \correctchoice{0.5点}\scoring{b=0.5}
+  \end{choices}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{questionmult}{3 or zero}\scoring{mz=3}
+  完答なら3点、そうでなければ0点。
+  \begin{choices}
+    \wrongchoice{誤り}
+    \wrongchoice{誤り}
+    \correctchoice{正しい}
+    \correctchoice{正しい}
+  \end{choices}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{questionmult}{all for 2}\scoring{haut=2}
+  完答なら2点、ミス1件ごとに-1点...
+  \begin{choices}
+    \correctchoice{正解}
+    \correctchoice{これも可}
+    \correctchoice{そのとおり!}
+    \wrongchoice{ダメ!}
+    \wrongchoice{マークするな!}
+  \end{choices}
+\end{questionmult}
+}
+
+\element{qqs}{
+\begin{question}{attention}\scoring{b=2}
+  ひどい誤りにはマイナス点（-2点）がつきますが、正解なら2点が得られます。
+  \begin{choices}
+    \correctchoice{正しい!}
+    \wrongchoice{正しくない}
+    \wrongchoice{正しくない}
+    \wrongchoice{正しくない}
+    \wrongchoice{ひどい誤り!}\scoring{-2}
+  \end{choices}
+\end{question}
+}
+
+\element{qqs}{
+\begin{questionmult}{as you like}
+  必要な点数を選んでください:
+  \begin{choices}
+    \correctchoice{ここなら2点得られます}\scoring{b=2}
+    \wrongchoice{マークすると3点あげます}\scoring{b=0,m=3}
+    \correctchoice{マークすると1点得ますが、マークしないと1点失います}\scoring{m=-1}
+  \end{choices}
+\end{questionmult}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\onecopy{20}{
+
+\noindent{\bf QCM  \hfill 採点基準テスト}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Jan. 2008\end{minipage}
+\namefield{\fbox{\begin{minipage}{.5\linewidth}
+Name:
+
+\vspace*{.5cm}\dotfill
+\vspace*{1mm}
+\end{minipage}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\shufflegroup{qqs}
+
+\insertgroup{qqs}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+}
+
+\end{document}

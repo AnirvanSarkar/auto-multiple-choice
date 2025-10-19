@@ -1,0 +1,97 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[box,completemulti]{automultiplechoice}
+\begin{document}
+
+%%% preparation of the groups
+
+\setdefaultgroupmode{withoutreplacement}
+
+\element{geographie}{
+  \begin{question}{Paris}
+    In which continent is Paris?
+    \begin{choices}
+      \correctchoice{Europe}
+      \wrongchoice{Africa}
+      \wrongchoice{Asia}
+      \wrongchoice{planet Mars}
+    \end{choices}
+  \end{question}
+}
+
+\element{geographie}{
+  \begin{question}{Cameroon}
+    Which is the capital city of Cameroon?
+    \begin{choices}
+      \correctchoice{Yaoundé}
+      \wrongchoice{Douala}
+      \wrongchoice{Abou-Dabi}
+    \end{choices}
+  \end{question}
+}
+
+\element{histoire}{
+  \begin{question}{Marignan}
+    In which year did the battle of Marignan take place?
+    \begin{choiceshoriz}
+      \correctchoice{1515}
+      \wrongchoice{1915}
+      \wrongchoice{1519}
+    \end{choiceshoriz}
+  \end{question}
+}
+
+\element{histoire}{
+  \begin{questionmult}{Nantes}
+    What can be said about the \emph{Édit de Nantes}?
+    \begin{choices}
+      \correctchoice{It was signed in 1598}
+      \correctchoice{Il has been revoked by Louis XIV}
+      \wrongchoice{It was signed by Henri II}
+    \end{choices}
+  \end{questionmult}
+}
+
+%%% copies
+
+\onecopy{10}{
+
+%%% beginning of the test sheet header:
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+  \centering\large\bf History and geography\\ Examination on Jan. 1st, 2008
+\end{minipage}
+\namefield{\fbox{\begin{minipage}{.5\linewidth}
+Firstname and lastname:
+
+\vspace*{.5cm}\dotfill
+\vspace*{1mm}
+\end{minipage}}}
+
+%%% end of the header
+
+\begin{center}
+  \hrule\vspace{2mm}
+  \bf\Large Geography
+  \vspace{1mm}\hrule
+\end{center}
+
+\insertgroup{geographie}
+
+\begin{center}
+  \hrule\vspace{2mm}
+  \bf\Large History
+  \vspace{2mm}\hrule
+\end{center}
+
+\insertgroup{histoire}
+
+}
+
+\end{document}

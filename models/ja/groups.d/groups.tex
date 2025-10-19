@@ -1,0 +1,94 @@
+\documentclass[a4paper]{article}
+
+\usepackage[box,completemulti,lang=JA]{automultiplechoice}
+\begin{document}
+
+%%% グループの準備
+
+\setdefaultgroupmode{withoutreplacement}
+
+\element{地理}{
+  \begin{question}{パリ}
+    パリはどの大陸にありますか？
+    \begin{choices}
+      \correctchoice{ヨーロッパ}
+      \wrongchoice{アフリカ}
+      \wrongchoice{アジア}
+      \wrongchoice{火星}
+    \end{choices}
+  \end{question}
+}
+
+\element{地理}{
+  \begin{question}{カメルーン}
+    カメルーンの首都はどれですか？
+    \begin{choices}
+      \correctchoice{ヤウンデ}
+      \wrongchoice{ドゥアラ}
+      \wrongchoice{アブダビ}
+    \end{choices}
+  \end{question}
+}
+
+\element{歴史}{
+  \begin{question}{応仁}
+    応仁の乱はいつ始まりましたか？
+    \begin{choiceshoriz}
+      \correctchoice{1467年}
+      \wrongchoice{1967年}
+      \wrongchoice{1419年}
+    \end{choiceshoriz}
+  \end{question}
+}
+
+\element{歴史}{
+  \begin{questionmult}{Nantes}
+    \emph{ナントの勅令}について正しいのはどれですか？
+    \begin{choices}
+      \correctchoice{1598年に発布された}
+      \correctchoice{ルイ14世により破棄された}
+      \wrongchoice{ヘンリ2世により発布された}
+    \end{choices}
+  \end{questionmult}
+}
+
+%%% copies
+
+\onecopy{10}{
+
+%%% 試験問題用紙ヘッダー開始:
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+  \centering\large\bf 歴史と地理\\ 試験日 2008年1月1日
+\end{minipage}
+\namefield{\fbox{\begin{minipage}{.5\linewidth}
+氏名:
+
+\vspace*{.5cm}\dotfill
+\vspace*{1mm}
+\end{minipage}}}
+
+%%% ヘッダー終了
+
+\begin{center}
+  \hrule\vspace{2mm}
+  \bf\Large 地理
+  \vspace{1mm}\hrule
+\end{center}
+
+\insertgroup{地理}
+
+\begin{center}
+  \hrule\vspace{2mm}
+  \bf\Large 歴史
+  \vspace{2mm}\hrule
+\end{center}
+
+\insertgroup{歴史}
+
+}
+
+\end{document}

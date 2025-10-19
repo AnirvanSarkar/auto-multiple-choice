@@ -3,6 +3,7 @@ stages:
   - build
   - test
   - package
+  - packagetest
 
 build:
   stage: build
@@ -51,16 +52,6 @@ test-uninstall:
     paths:
       - files/
 
-doc-xml:
-  stage: test
-  needs: []
-  image: debian:testing-slim
-  before_script:
-    - apt-get update
-    - apt-get install -y make libxml2-utils docbook-xml
-  script:
-    - make -C doc check
-
 pack-sources:
   stage: build
   image: jojoboulix/amc-build
@@ -99,6 +90,38 @@ test-portable:
     - AMC_PATH=$CI_PROJECT_DIR/portable/AMC/bin/auto-multiple-choice ./blind-tests.sh simple
   allow_failure: true
 
+pack-ppa:
+  stage: package
+  needs:
+    - job: pack-sources
+      artifacts: true
+  image: debian:testing-slim
+  before_script:
+    - perl ./local/deb822toplain.pl >> /etc/apt/sources.list
+    - apt-get update
+    - apt-get install -y git git-buildpackage
+  script:
+    - mk-build-deps -i -t "apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends -y" ppa/control
+    - "export GBP_V=`git describe --tags --abbrev=0`"
+    - 'export GBP_DATE=`echo "$CI_COMMIT_TIMESTAMP" | head -c 16 | sed "s/[^0-9]//g"`'
+    - 'export GBP_UPSTREAM="$GBP_V+git$GBP_DATE"'
+    - git init --initial-branch="$(gbp config DEFAULT.debian-branch)" amc-ppa
+    - cd amc-ppa
+    - git config user.name AMC
+    - git config user.email "paamc@passoire.fr"
+    - export DEBEMAIL=paamc@passoire.fr
+    - 'gbp import-orig --upstream-version=$GBP_UPSTREAM --no-interactive --import-msg "New upstream version from git @$CI_COMMIT_SHORT_SHA" ../artifacts/*_sources.tar.gz'
+    - cp -a ppa debian
+    - git add debian
+    - git commit -m "Use PPA as debian source"
+    - gbp dch -N "$GBP_UPSTREAM-1" --git-author --commit
+    - gbp buildpackage
+  artifacts:
+    paths:
+      - "auto-multiple-choice*_*"
+    exclude:
+      - "auto-multiple-choice-build-deps*"
+
 pack-debian:
   stage: package
   needs:
@@ -131,3 +154,23 @@ pack-debian:
     exclude:
       - "debian-package/auto-multiple-choice-build-deps*"
   allow_failure: true
+
+test-ppa:
+  stage: packagetest
+  needs:
+    - job: pack-ppa
+      artifacts: true
+  image: debian:testing-slim
+  before_script:
+    - apt update
+    - apt install -y xvfb xauth at-spi2-core gir1.2-notify-0.7 python3-dogtail libglib2.0-bin
+  script:
+    - apt install -y ./auto-multiple-choice_*.deb ./auto-multiple-choice-common_*.deb
+    - cd tests/gui/dogtail
+    - ./blind-tests.sh simple postcorrect utf8
+    - apt install -y texlive-lang-french
+    - ./blind-tests.sh template template-2
+    - apt install -y sqlite3
+    - ./blind-tests.sh manual
+    - apt install -y gedit
+    - ./blind-tests.sh pdfform
