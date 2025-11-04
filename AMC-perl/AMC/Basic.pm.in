@@ -231,10 +231,16 @@ sub use_gm_command {
 
 my $magick_pmodule = '';
 
+my @magick_perl_mods = ('Image::Magick');
+
+if (!$ENV{AMC_DONT_USE_GM}) {
+    unshift( @magick_perl_mods, 'Graphics::Magick' );
+}
+
 sub magick_perl_module {
     my ($dont_load_it) = @_;
     if ( !$magick_pmodule ) {
-      TEST: for my $m (qw/Graphics::Magick Image::Magick/) {
+      TEST: for my $m (@magick_perl_mods) {
             if ( check_install( module => $m ) ) {
                 $magick_pmodule = $m;
                 last TEST;

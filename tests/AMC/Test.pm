@@ -260,6 +260,10 @@ sub install {
 
     print { $self->{tracedest} } "[>] Installed in $self->{temp_dir}\n";
 
+    print { $self->{tracedest} }
+        "[>] magick_module(x) is \"" . join(' ',magick_module('x')) . "\", " .
+        "magick_perl_module is " . magick_perl_module(1) . "\n";
+    
     if ( -d ( $self->{temp_dir} . "/scans" ) && !$self->{scans} ) {
         opendir( my $dh, $self->{temp_dir} . "/scans" )
           || die "can't opendir $self->{temp_dir}: $!";
