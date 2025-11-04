@@ -44,6 +44,8 @@ test: $(EPS) FORCE
 blind-test: $(EPS) FORCE
 	@echo "Using qpdf"
 	./all_tests --blind
+	@echo "Without GraphicsMagick"
+	AMC_DONT_USE_GM=1 ./selected_tests --blind
 	@echo "Using pdftk"
 	./selected_tests --blind --extract-with pdftk
 ifneq (,$(wildcard /usr/local/bin/sejda-console))
