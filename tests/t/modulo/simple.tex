@@ -1,0 +1,88 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}    
+\usepackage[T1]{fontenc}
+
+\usepackage[francais,bloc,completemulti]{automultiplechoice}    
+\begin{document}
+
+\exemplaire{10}{    
+
+%%% debut de l'en-tête des copies :    
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Examen du 01/01/2008\end{minipage}
+\champnom{\fbox{    
+                \begin{minipage}{.5\linewidth}
+                  Nom et prénom :
+
+                  \vspace*{.5cm}\namefielddots   
+                  \vspace*{1mm}
+                \end{minipage}
+         }}
+
+\vspace{1ex}
+
+%%% fin de l'en-tête
+
+\begin{questionmultx}{mult19}
+\scoring{formula="(intX<=20 ? 0 : intX \% 19 == 0 ? 2 : intX \% 19 == 1 ? 1 : intX \% 19 == 18 ? 1 : 0)"}
+
+Un multiple de 19 (différent de 0 et 19) :
+
+\AMCnumericChoices{38}{
+  digits=4,
+  decimals=0,
+  sign=false,
+  scoring=false
+}
+
+\end{questionmultx}
+
+\begin{questionmultx}{mult7}
+\scoring{formula="(intX \% 7 == 0 ? 2 : intX \% 7 == 1 ? 1 : intX \% 7 == 6 ? 1 : 0)"}
+
+Un multiple de 7 :
+
+\AMCnumericChoices{21}{
+  digits=2,
+  decimals=0,
+  sign=false,
+  scoring=false
+}
+
+\end{questionmultx}
+
+\begin{questionmultx}{mult5}
+\scoring{formula="(intX \% 5 == 0 ? 2 : intX \% 5 == 1 ? 1 : intX \% 5 == 4 ? 1 : 0)"}
+
+Un multiple de 5 :
+
+\AMCnumericChoices{15}{
+  digits=4,
+  decimals=0,
+  sign=false,
+  scoring=false
+}
+
+\end{questionmultx}
+\begin{questionmultx}{mult9}
+\scoring{formula="(intX \% 2 == 1 && intX \% 9 == 0 ? 2 : intX \% 9 == 0 ? 1 : 0)"}
+
+Un multiple impair de 9 :
+
+\AMCnumericChoices{27}{
+  digits=3,
+  decimals=0,
+  sign=false,
+  scoring=false
+}
+
+\end{questionmultx}
+
+}   
+
+\end{document}

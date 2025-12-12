@@ -1317,12 +1317,17 @@ if ( $to_do{b} ) {
 
         if (/\\message\{B=(.+)\}/) {
 
+            my $strategy = $1;
+
+            # The character % has to be escaped by LaTeX to be processed 
+            $strategy =~ s/\\\%/%/g;
+
             # scoring strategy string
             if ($quest) {
                 if ($rep) {
 
                     # associated to an answer
-                    $scoring->add_answer_strategy( $etu, $quest, $rep, $1 );
+                    $scoring->add_answer_strategy( $etu, $quest, $rep, $strategy );
                 } else {
 
                     # associated to a question
@@ -1330,13 +1335,13 @@ if ( $to_do{b} ) {
                           $current_q->{strategy}
                         ? $current_q->{strategy} . ','
                         : ''
-                    ) . $1;
+                    ) . $strategy;
                 }
             } else {
 
                 # global scoring strategy, associated to a student if
                 # $etu>0, or to all students if $etu==0
-                $scoring->add_main_strategy( $etu, $1 );
+                $scoring->add_main_strategy( $etu, $strategy );
             }
         }
 
