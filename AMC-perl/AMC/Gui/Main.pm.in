@@ -3519,8 +3519,29 @@ sub noter {
 
 sub noter_callback {
     my ( $self, $c, %data ) = self_first(@_);
-    $self->check_sty_version($c);
+
     $self->detecte_documents();
+
+    if($c->has_warnings_or_errors ) {
+        debug "Errors while updating scoring strategy!";
+        my $message = __("AMC could not extract the scoring strategy from the source file, because LaTeX reported some problems while processing the source file.");
+        $message .= " "
+            . __(
+            "You have to correct the source file and re-run marking."
+            );
+
+        $message .= $c->problems_markup;
+
+        my $dialog = Gtk3::MessageDialog->new( $self->get_ui('main_window'),
+            'destroy-with-parent', 'error', 'ok', '' );
+        $dialog->set_markup($message);
+        $dialog->run;
+        $dialog->destroy;
+        
+        return();
+    }
+    
+    $self->check_sty_version($c);
 
     if ( !$data{cancelled} ) {
         $self->noter_postcorrect();
