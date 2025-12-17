@@ -99,7 +99,7 @@ pack-ppa:
   before_script:
     - perl ./local/deb822toplain.pl >> /etc/apt/sources.list
     - apt-get update
-    - apt-get install -y git git-buildpackage
+    - apt-get install -y git git-buildpackage equivs
   script:
     - mk-build-deps -i -t "apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends -y" ppa/control
     - "export GBP_V=`git describe --tags --abbrev=0`"
@@ -131,7 +131,7 @@ pack-debian:
   before_script:
     - perl ./local/deb822toplain.pl >> /etc/apt/sources.list
     - apt-get update
-    - apt-get install -y git git-buildpackage
+    - apt-get install -y git git-buildpackage equivs
   script:
     - mkdir debian-package
     - cd debian-package
