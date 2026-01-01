@@ -4847,6 +4847,13 @@ along with Auto-Multiple-Choice.  If not, see
   \AMC@if@separate@question{\AMC@mem@category{open}}%
   \AMCformatChoices{\AMCopenShow}{\AMCopenHide}%
 }
+\ExplSyntaxOn
+\cs_new:Npn \amc_open_question:nn #1#2 {
+  \AMCOpen{#1}{#2}
+}
+\cs_generate_variant:Nn \amc_open_question:nn { xn }
+\cs_new_eq:NN \AMCOpenX \amc_open_question:xn
+\ExplSyntaxOff
 %    \end{macrocode}
 % \end{macro}
 %
