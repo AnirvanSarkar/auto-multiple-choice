@@ -44,6 +44,7 @@ sub new {
     $self->{'out.stats'}      = '';
     $self->{'out.statsindic'} = '';
     $self->{'out.groupsums'}  = 0;
+    $self->{'out.filter'}     = 0;
     $self->{'out.groupsep'}   = ':';
 
     if ( can_load( modules => { Pango => undef, Cairo => undef } ) ) {
@@ -1116,6 +1117,33 @@ sub export {
         },
     );
 
+    # FilterEntete
+    $styles->createStyle(
+        'FilterEntete',
+        parent     => 'Tableau',
+        family     => 'table-cell',
+        properties => {
+            -area           => 'paragraph',
+            'fo:text-align' => "center",
+        },
+    );
+
+    $styles->updateStyle(
+        'FilterEntete',
+        properties => {
+            -area                 => 'table-cell',
+            'fo:background-color' => "#d5ebff",
+        },
+    );
+
+    $styles->updateStyle(
+        'FilterEntete',
+        properties => {
+            -area           => 'text',
+            'fo:font-style' => 'italic',
+        },
+    );
+
     # NoteF : note finale pour la copie
     $styles->createStyle(
         'NoteF',
@@ -1275,9 +1303,7 @@ sub export {
 
     $doc->setAttribute( $feuille, 'table:print' => 'true' );
 
-    $doc->expandTable( $feuille, $dimy, $dimx );
-    $doc->renameTable(
-        $feuille,
+    my $table_name = 
         encode(
             'utf-8',
             (
@@ -1290,8 +1316,10 @@ sub export {
                     "Marks"
                 )
             )
-        )
-    );
+        );
+
+    $doc->expandTable( $feuille, $dimy, $dimx );
+    $doc->renameTable( $feuille, $table_name );
 
     if ( $self->{'out.nom'} ) {
         $doc->cellStyle( $feuille, 0, 0, 'Titre' );
@@ -1488,6 +1516,48 @@ sub export {
     $doc->cellValue( $feuille, $jj, $code_col{total},
         encode( 'utf-8', translate_id_name('moyenne') ) );
     $code_row{average} = $jj;
+
+    ##########################################################################
+    # optional row: headers for filtering
+    ##########################################################################
+
+    if ( $self->{'out.filter'} ) {
+
+        $jj++;
+
+        $ii = $x0;
+        for ( @student_columns, qw/note total max/ ) {
+            $doc->cellStyle( $feuille, $jj, $ii, 'FilterEntete' );
+
+            $code_col{$_} = $ii;
+            my $name = $_;
+            $name = "A:" . encode( 'utf-8', $lk ) if ( $name eq 'student.key' );
+            $name = translate_column_title('nom')
+              if ( $name eq 'student.name' );
+            $name = translate_column_title('copie')
+              if ( $name eq 'student.copy' );
+
+            $col_content{$_} = [$name];
+            $doc->cellValue( $feuille, $jj, $ii, encode( 'utf-8', $name ) );
+
+            $ii++;
+        }
+
+        my $topics_visibility = $topics->get_option('odscolumns');
+
+        for (
+            1 .. (
+                @topics + @level_topics + @questions_0 + @questions_1 + @codes
+            )
+          )
+        {
+            $doc->cellStyle( $feuille, $jj, $ii, 'FilterEntete' );
+            $ii++;
+        }
+
+        $code_col{__LAST_COL__} = $ii - 1;
+        $code_row{filter}       = $jj;
+    }
 
     ##########################################################################
     # following rows: students sheets
@@ -2004,6 +2074,25 @@ sub export {
 
         $self->build_stats_table( $self->{'out.statsindic'},
             $cts, [], $doc, $stats_1, @questions_1 );
+    }
+
+    if ( $self->{'out.filter'} ) {
+        my $ranges =
+          $doc->appendElement( '//office:spreadsheet', 0,
+            'table:database-ranges' );
+
+        $doc->appendElement(
+            $ranges,
+            'table:database-range',
+            attributes => {
+                'table:display-filter-buttons' => 'true',
+                'table:name'                   => 'grades data',
+                'table:target-range-address'   => $table_name . "."
+                  . yx2ooo( $code_row{filter}, $x0 ) . ":"
+                  . $table_name . "."
+                  . yx2ooo( $y2 - 1, $code_col{__LAST_COL__} )
+            },
+        );
     }
 
     ##########################################################################

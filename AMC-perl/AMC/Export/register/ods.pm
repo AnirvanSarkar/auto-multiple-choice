@@ -53,6 +53,7 @@ sub options_from_config {
         statsindic => $config->get('export_ods_statsindic'),
         groupsums  => $config->get('export_ods_group'),
         groupsep   => $config->get('export_ods_groupsep'),
+        filter     => $config->get('export_ods_filter'),
     );
 }
 
@@ -69,6 +70,7 @@ sub options_default {
         export_ods_statsindic => '',
         export_ods_group      => '0',
         export_ods_groupsep   => ':',
+        export_ods_filter     => '',
     );
 }
 
@@ -82,6 +84,12 @@ sub build_config_gui {
     my $widget;
     my $renderer;
     my $y = 0;
+
+    $t->attach( Gtk3::Label->new( __ "Add filter row" ), 0, $y, 1, 1 );
+    $widget   = Gtk3::CheckButton->new();
+    $main->{ui}->{export_cb_export_ods_filter} = $widget;
+    $t->attach( $widget, 1, $y, 1, 1 );
+    $y++;
 
     $t->attach(
         Gtk3::Label->new(
