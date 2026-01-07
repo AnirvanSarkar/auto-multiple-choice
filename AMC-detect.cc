@@ -860,6 +860,10 @@ void mesure_case(cv::Mat src, cv::Mat illustr,int illustr_mode,
     z_ymin -= delta;
     z_xmax += delta;
     z_ymax += delta;
+
+    /* but keep inside the image... */
+    restreint(&z_xmin, &z_ymin, tx, ty);
+    restreint(&z_xmax, &z_ymax, tx, ty);
   }
 
   /* box reduction */
