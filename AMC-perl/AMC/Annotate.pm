@@ -835,7 +835,7 @@ sub draw_symbol {
     # when the subject background is used instead of the scan, darken
     # boxes that have been ticked by the student
     if ( ( $tick || $box->{flags} & BOX_FLAGS_RETICK ) && $cochee ) {
-        debug "Tick.";
+        debug "Q=$q R=$r / Tick.";
         $self->set_color('black');
         $self->command(
             join( ' ',
@@ -1041,6 +1041,8 @@ sub write_qscore {
         debug "Indicative question: no score to write";
         return;
     }
+
+    debug "QTEXT Q=$question";
 
     # if no coordinates, tries with a score zone...
     $position = 'zones' if(!$self->{question}->{$question});
