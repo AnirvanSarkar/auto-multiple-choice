@@ -68,6 +68,9 @@ s/\%[m]/$self->format_note($self->{scoring}->variable('mark_max'))/ge;
             debug "No marks found ! Copy="
               . studentids_string( $student, $copy );
         }
+
+        # Substitute codes values
+        $text =~ s/\%\(code:(.*?)\)/$self->{scoring}->student_code($student,$copy,$1)/ge;
     }
 
     $text =~ s/\%[n]/$self->{name}/ge;
