@@ -759,70 +759,15 @@ sub commande_annule {
 
 sub clear_processing {
     my ($self, $steps) = @_;
-    my $next    = '';
-    my %s       = ();
-    for my $k (qw/doc mep capture mark assoc/) {
-        if ( $steps =~ /\b$k:/ ) {
-            $next = 1;
-            $s{$k} = 1;
-        } elsif ( $next || $steps =~ /\b$k\b/ ) {
-            $s{$k} = 1;
-        }
-    }
 
+    my %s = $self->{project}->data->clear_data($self->absolu('%PROJET/'), $steps);
+                                      
     if ( $s{doc} ) {
         for (qw/question solution setting catalog/) {
             my $f = $self->get_absolute( 'doc_' . $_ );
             unlink($f) if ( -f $f );
         }
         $self->detecte_documents();
-    }
-
-    delete( $s{doc} );
-    return () if ( !%s );
-
-    # data to remove...
-
-    $self->{project}->data->begin_transaction('CLPR');
-
-    if ( $s{mep} ) {
-        $self->{project}->layout->clear_all;
-    }
-
-    if ( $s{capture} ) {
-        $self->{project}->capture->clear_all;
-        $self->{project}->scoring->delete_external();
-    }
-
-    if ( $s{mark} ) {
-        $self->{project}->scoring->clear_strategy;
-        $self->{project}->scoring->clear_score;
-    }
-
-    if ( $s{assoc} ) {
-        $self->{project}->association->clear;
-    }
-
-    $self->{project}->data->end_transaction('CLPR');
-
-    # files to remove...
-
-    if ( $s{capture} ) {
-
-        # remove zooms
-        remove_tree(
-            $self->absolu('%PROJET/cr/zooms'),
-            { verbose => 0, safe => 1, keep_root => 1 }
-        );
-
-        # remove namefield extractions and page layout image
-        my $crdir = $self->absolu('%PROJET/cr');
-        opendir( my $dh, $crdir );
-        my @cap_files = grep { /^(name-|page-)/ } readdir($dh);
-        closedir($dh);
-        for (@cap_files) {
-            unlink "$crdir/$_";
-        }
     }
 
     # update gui...

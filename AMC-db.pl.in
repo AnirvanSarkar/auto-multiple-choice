@@ -1,0 +1,187 @@
+#! @/PERLPATH/@
+#
+# Copyright (C) 2026 Alexis Bienvenüe <paamc@passoire.fr>
+#
+# This file is part of Auto-Multiple-Choice
+#
+# Auto-Multiple-Choice is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 2 of
+# the License, or (at your option) any later version.
+#
+# Auto-Multiple-Choice is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Auto-Multiple-Choice.  If not, see
+# <http://www.gnu.org/licenses/>.
+
+use warnings;
+use 5.012;
+
+use File::Spec::Functions
+  qw/splitpath catpath splitdir catdir catfile rel2abs tmpdir/;
+use File::Temp qw/ tempfile tempdir /;
+use File::Copy;
+
+use AMC::Path;
+use AMC::Basic;
+use AMC::Data;
+
+my $project_dir = '';
+my $data_dir    = '';
+my $scan        = '';
+my $dpi         = 200;
+my $downscale   = 2;
+my $scan_type   = 'jpg';
+my $image_type  = 'png';
+my $dest_file   = '';
+my $css_url     = '';
+
+GetProjectOptions(
+    ":data:dir|data=s"       => \$data_dir,
+    ":project_dir|project=s" => \$project_dir,
+    "scan!"                  => \$scan,
+    "dpi=s"                  => \$dpi,
+    "dest-file=s"            => \$dest_file,
+    "css-url=s"              => \$css_url,
+);
+
+die "Needs data directory" if ( !$data_dir );
+
+my $action = shift(@ARGV);
+
+my $data   = AMC::Data->new($data_dir);
+
+sub reverse_transform {
+    my ($t) = @_;
+    my $delta  = $t->{a} * $t->{d} - $t->{b} * $t->{c};
+    my $rev    = {};
+    $rev->{a} = $t->{d} / $delta;
+    $rev->{b} = -$t->{b} / $delta;
+    $rev->{c} = -$t->{c} / $delta;
+    $rev->{d} = $t->{a} / $delta;
+    $rev->{e} = ( $t->{b} * $t->{f} - $t->{e} * $t->{d} ) / $delta;
+    $rev->{f} = ( $t->{e} * $t->{c} - $t->{a} * $t->{f} ) / $delta;
+    return ($rev);
+}
+
+sub transform_matrix {
+    my ($t) = @_;
+    return "matrix(" . join( " ", map { $t->{$_} } (qw/a c b d e f/) ) . ")";
+}
+
+if($action eq "upgrade") {
+
+    for my $module (qw/association capture layout report scoring/) {
+        $data->require_module($module);
+    }
+
+} elsif($action eq "clear") {
+
+    $data->clear_data($project_dir, $ARGV[0]);
+
+} elsif($action eq "layout-image") {
+
+    my @spc = (1, 1, 0);
+    if( $ARGV[0] =~ /^([0-9]+)\/([0-9]+)(?::([0-9]+))?$/ ) {
+        @spc = ($1, $2, $3);
+    } else {
+        die "Unparsable page id: $ARGV[0]";
+    }
+
+    $spc[2] = '0' if(! $spc[2]);
+    
+    my @ep = @spc[ 0, 1 ];
+    
+    my $layout  = $data->module("layout");
+    my $capture = $data->module("capture");
+
+    $data->begin_read_transaction("DBIO");
+    
+    my $info = $layout->page_info(@ep);
+    my $page = $info->{subjectpage};
+    my $mark_radius = $info->{markdiameter} / 2;
+
+    my $dest_image = $dest_file;
+    my $width = int($info->{width});
+    my $height = int($info->{height});
+    my $transform = "";
+
+    my $scan_file =
+        proj2abs( { '%PROJET' => $project_dir }, $capture->get_scan_page(@spc) );
+    my $scan_page = $capture->get_page(@spc);
+
+    my @boxes = $layout->page_boxes(@ep);
+    my @marks = $layout->page_marks(@ep);
+    my $namefield = $layout->page_zone(@ep, '__n');
+    
+    $data->end_transaction("DBIO");
+
+    if ( $scan && -f $scan_file ) {
+
+        $dest_image .= "." . $scan_type;
+        
+        system_debug(
+                     cmd => [
+                             "convert", $scan_file, $dest_image ]
+                    );
+
+        $transform = transform_matrix(reverse_transform($scan_page));
+
+    } else {
+
+        my $temp_loc = tmpdir();
+        my $tempdir  = tempdir(
+            DIRECTORY => $temp_loc,
+            CLEANUP   => ( !get_debug() )
+        );
+
+        $dest_image .= "." . $image_type;
+        
+        system_debug(
+            cmd => [
+                "gs",                         "-q",
+                "-dNOPAUSE",                  "-dBATCH",
+                "-sDEVICE=pnggray",           "-dDownScaleFactor=$downscale",
+                "-r" . ( $dpi * $downscale ), "-dPDFFitPage",
+                "-dFirstPage=$page",          "-dLastPage=$page",
+                "-dUseCropBox",               "-sOutputFile=" . $dest_image,
+                "$project_dir/DOC-sujet.pdf"
+            ]
+        );
+
+    }
+
+    print("VAR: image=$dest_image\n");
+
+    my $fn = $dest_image;
+    $fn =~ s/.*\///;
+
+    open(SVG, ">", "$dest_file.svg");
+    print SVG "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 $width $height\">\n";
+    print SVG '<link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" href="'.$css_url.'" type="text/css" />'. "\n" if($css_url);
+    print SVG "<image x=\"0\" y=\"0\" width=\"$width\" height=\"$height\" href=\"$fn\"";
+    if($transform) {
+        print SVG " transform=\"$transform\"";
+    }
+    print SVG " />\n";
+    for my $box (@boxes) {
+        print SVG '<rect x="' . $box->{xmin} .'" y="'. $box->{ymin}.'" width="'.($box->{xmax}-$box->{xmin}).'" height="'.($box->{ymax}-$box->{ymin}).'" class="box'.$box->{role}.'" id="box'.$box->{role}.'_'.$box->{question}.'_'.$box->{answer}.'" onclick="clickBox('.$box->{question}.','.$box->{answer}.')"/>' ."\n";
+    }
+    for my $m (@marks) {
+        print SVG '<circle r="'.$mark_radius.'" cx="'.$m->{x}.'" cy="'.$m->{y}.'" class="corner-mark" />' ."\n";
+    }
+    if($namefield) {
+        print SVG '<rect x="' . $namefield->{xmin} .'" y="'. $namefield->{ymin}.'" width="'.($namefield->{xmax}-$namefield->{xmin}).'" height="'.($namefield->{ymax}-$namefield->{ymin}).'" class="namefield" id="namefield" />' ."\n";
+    }
+    
+    print SVG "</svg>\n";
+    close(SVG);
+
+    print("VAR: svg=$dest_file.svg\n");
+
+}
+

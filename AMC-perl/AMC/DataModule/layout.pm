@@ -791,6 +791,11 @@ sub define_statements {
               . $self->table("mark")
               . " WHERE student=? AND page=? AND corner=?"
         },
+        pageMarks => {
+                sql => "SELECT x,y,corner FROM "
+              . $self->table("mark")
+              . " WHERE student=? AND page=?"
+        },
         pageInfo => {
                 sql => "SELECT * FROM "
               . $self->table("page")
@@ -1052,6 +1057,33 @@ sub page_info {
             $self->statement('pageInfo'),
             {}, $student, $page
         )
+    );
+}
+
+# page_zone returns the zone info
+
+sub page_zone {
+    my ( $self, $student, $page, $name ) = @_;
+    return (
+        $self->dbh->selectrow_hashref(
+            $self->statement('zoneInfo'),
+            {}, $student, $page, $name
+        )
+    );
+}
+
+# page_marks returns an array of HASH with the 4 corner marks of e
+# given page
+
+sub page_marks {
+    my ( $self, $student, $page ) = @_;
+    return (
+        @{
+            $self->dbh->selectall_arrayref(
+                $self->statement('pageMarks'), { Slice => {} },
+                $student, $page
+            )
+        }
     );
 }
 
@@ -1519,6 +1551,21 @@ sub box_char {
             $student, $question, $answer, $role
         )
     );
+}
+
+# Get boxes info from one page
+
+sub page_boxes {
+    my ( $self, $student, $page, $role_min, $role_max ) = @_;
+    $role_min = BOX_ROLE_ANSWER if(!$role_min);
+    $role_max = BOX_ROLE_QUESTIONONLY if(!$role_max);
+    return @{
+        $self->dbh->selectall_arrayref(
+            $self->statement('boxInfo'), { Slice => {} },
+            $student,  $page,
+            $role_min, $role_max
+        )
+    };
 }
 
 # Get the page where we can find the namefield for a particular student

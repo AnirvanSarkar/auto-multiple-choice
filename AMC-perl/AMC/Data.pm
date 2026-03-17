@@ -31,6 +31,8 @@ use Module::Load;
 use AMC::Basic;
 use DBI;
 
+use File::Path qw/remove_tree/;
+
 sub new {
     my ( $class, $dir, %oo ) = @_;
 
@@ -303,6 +305,65 @@ sub progression {
             }
         }
     }
+}
+
+sub clear_data {
+    my ( $self, $project_dir, $steps ) = @_;
+
+    my $next    = '';
+    my %s       = ();
+    for my $k (qw/doc mep capture mark assoc/) {
+        if ( $steps =~ /\b$k:/ ) {
+            $next = 1;
+            $s{$k} = 1;
+        } elsif ( $next || $steps =~ /\b$k\b/ ) {
+            $s{$k} = 1;
+        }
+    }
+    
+    $self->begin_transaction('CLPR');
+
+    if ( $s{mep} ) {
+        $self->module("layout")->clear_all;
+    }
+
+    if ( $s{capture} ) {
+        $self->module("capture")->clear_all;
+        $self->module("scoring")->delete_external();
+    }
+
+    if ( $s{mark} ) {
+        $self->module("scoring")->clear_strategy;
+        $self->module("scoring")->clear_score;
+    }
+
+    if ( $s{assoc} ) {
+        $self->module("association")->clear;
+    }
+
+    $self->end_transaction('CLPR');
+
+    # files to remove...
+
+    if ( $s{capture} ) {
+
+        # remove zooms
+        remove_tree(
+            $project_dir . '/cr/zooms',
+            { verbose => 0, safe => 1, keep_root => 1 }
+        );
+
+        # remove namefield extractions and page layout image
+        my $crdir = $project_dir . '/cr';
+        opendir( my $dh, $crdir );
+        my @cap_files = grep { /^(name-|page-)/ } readdir($dh);
+        closedir($dh);
+        for (@cap_files) {
+            unlink "$crdir/$_";
+        }
+    }
+
+    return(%s);
 }
 
 1;
