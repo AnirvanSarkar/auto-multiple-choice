@@ -53,11 +53,15 @@ my $password            = '';
 my $students_list       = '';
 my $students_list_key   = '';
 my $password_key        = '';
+my $student_min         = -1;
+my $student_max         = -1;
 
 GetProjectOptions(
     ":data:dir|data=s"                     => \$data_dir,
     ":doc_question:file|sujet=s"           => \$sujet,
     "fich-numeros=s"                       => \$fich_nums,
+    "student-min=s"                        => \$student_min,
+    "student-max=s"                        => \$student_max,
     "progression=s"                        => \$progress,
     "progression-id=s"                     => \$progress_id,
     ":print_command_pdf|print-command=s"   => \$print_cmd,
@@ -121,6 +125,10 @@ if ($fich_nums) {
         push @es, $1 if (/^([0-9]+)$/);
     }
     close(NUMS);
+} elsif($student_min>0 && $student_max>0) {
+    for my $i ($student_min..$student_max) {
+        push @es, $i;
+    }
 } else {
     $layout->begin_read_transaction('prST');
     @es = $layout->query_list('students');
