@@ -38,6 +38,7 @@ my $downscale   = 2;
 my $scan_type   = 'jpg';
 my $image_type  = 'png';
 my $dest_file   = '';
+my $url_prefix  = '';
 my $css_url     = '';
 
 GetProjectOptions(
@@ -46,6 +47,7 @@ GetProjectOptions(
     "scan!"                  => \$scan,
     "dpi=s"                  => \$dpi,
     "dest-file=s"            => \$dest_file,
+    "url-prefix=s"           => \$url_prefix,
     "css-url=s"              => \$css_url,
 );
 
@@ -163,7 +165,7 @@ if($action eq "upgrade") {
     open(SVG, ">", "$dest_file.svg");
     print SVG "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 $width $height\">\n";
     print SVG '<link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" href="'.$css_url.'" type="text/css" />'. "\n" if($css_url);
-    print SVG "<image x=\"0\" y=\"0\" width=\"$width\" height=\"$height\" href=\"$fn\"";
+    print SVG "<image x=\"0\" y=\"0\" width=\"$width\" height=\"$height\" href=\"$url_prefix$fn\"";
     if($transform) {
         print SVG " transform=\"$transform\"";
     }
