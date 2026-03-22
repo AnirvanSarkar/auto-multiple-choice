@@ -40,6 +40,8 @@ my $image_type  = 'png';
 my $dest_file   = '';
 my $url_prefix  = '';
 my $css_url     = '';
+my $darkness_threshold    = 0.1;
+my $darkness_threshold_up = 1.0;
 
 GetProjectOptions(
     ":data:dir|data=s"       => \$data_dir,
@@ -49,6 +51,8 @@ GetProjectOptions(
     "dest-file=s"            => \$dest_file,
     "url-prefix=s"           => \$url_prefix,
     "css-url=s"              => \$css_url,
+    ":seuil|seuil=s"         => \$darkness_threshold,
+    ":seuil_up|seuil-up=s"   => \$darkness_threshold_up,
 );
 
 die "Needs data directory" if ( !$data_dir );
@@ -162,6 +166,8 @@ if($action eq "upgrade") {
     my $fn = $dest_image;
     $fn =~ s/.*\///;
 
+    $data->begin_read_transaction("DBBX");
+
     open(SVG, ">", "$dest_file.svg");
     print SVG "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 $width $height\">\n";
     print SVG '<link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" href="'.$css_url.'" type="text/css" />'. "\n" if($css_url);
@@ -171,7 +177,13 @@ if($action eq "upgrade") {
     }
     print SVG " />\n";
     for my $box (@boxes) {
-        print SVG '<rect x="' . $box->{xmin} .'" y="'. $box->{ymin}.'" width="'.($box->{xmax}-$box->{xmin}).'" height="'.($box->{ymax}-$box->{ymin}).'" class="box'.$box->{role}.'" id="box'.$box->{role}.'_'.$box->{question}.'_'.$box->{answer}.'" onclick="clickBox('.$box->{question}.','.$box->{answer}.')"/>' ."\n";
+        print SVG '<rect x="' . $box->{xmin} .'" y="'. $box->{ymin}.'" width="'.($box->{xmax}-$box->{xmin}).'" height="'.($box->{ymax}-$box->{ymin}).'" class="box'.$box->{role};
+        if($capture->ticked($spc[0], $spc[2],
+                            $box->{question}, $box->{answer},
+                            $darkness_threshold, $darkness_threshold_up)) {
+            print SVG " ticked";
+        }
+        print SVG '" id="box'.$box->{role}.'_'.$box->{question}.'_'.$box->{answer}.'" onclick="clickBox('.$box->{question}.','.$box->{answer}.')"/>' ."\n";
     }
     for my $m (@marks) {
         print SVG '<circle r="'.$mark_radius.'" cx="'.$m->{x}.'" cy="'.$m->{y}.'" class="corner-mark" />' ."\n";
@@ -183,7 +195,8 @@ if($action eq "upgrade") {
     print SVG "</svg>\n";
     close(SVG);
 
-    print("VAR: svg=$dest_file.svg\n");
+    $data->end_transaction("DBBX");
 
+    print("VAR: svg=$dest_file.svg\n");
 }
 
