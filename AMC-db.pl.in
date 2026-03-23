@@ -172,7 +172,10 @@ if($action eq "upgrade") {
     open(SVG, ">", "$dest_file.svg");
     print SVG "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 $width $height\">\n";
     print SVG '<link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" href="'.$css_url.'" type="text/css" />'. "\n" if($css_url);
-    print SVG "<image x=\"0\" y=\"0\" width=\"$width\" height=\"$height\" href=\"$url_prefix$fn\"";
+    print SVG "<image x=\"0\" y=\"0\" ";
+    print SVG "width=\"$width\" height=\"$height\" "
+        if(!$transform);
+    print SVG "href=\"$url_prefix$fn\"";
     if($transform) {
         print SVG " transform=\"$transform\"";
     }
