@@ -29,6 +29,7 @@ use File::Copy;
 use AMC::Path;
 use AMC::Basic;
 use AMC::Data;
+use AMC::DataModule::layout ':flags';
 
 my $project_dir = '';
 my $data_dir    = '';
@@ -198,5 +199,48 @@ if($action eq "upgrade") {
     $data->end_transaction("DBBX");
 
     print("VAR: svg=$dest_file.svg\n");
-}
 
+} elsif($action eq "force-manual") {
+
+    my @spc = (1, 1, 0);
+    if( $ARGV[0] =~ /^([0-9]+)\/([0-9]+)(?::([0-9]+))?$/ ) {
+        @spc = ($1, $2, $3);
+    } else {
+        die "Unparsable page id: $ARGV[0]";
+    }
+
+    my $layout = $data->module("layout");
+    my $capture = $data->module("capture");
+    
+    $data->begin_transaction("DBMN");
+
+    $capture->outdate_annotated_page(@spc);
+    $capture->set_page_manual(@spc, time());
+
+    for my $box ($layout->page_boxes($spc[0], $spc[1], BOX_ROLE_ANSWER, BOX_ROLE_ANSWER)) {
+        my $ticked = $capture->ticked($spc[0], $spc[2],
+                                      $box->{question}, $box->{answer},
+                                      $darkness_threshold, $darkness_threshold_up);
+        $capture->set_manual(@spc, BOX_ROLE_ANSWER,
+                             $box->{question}, $box->{answer},
+                             ($ticked ? 1 : 0));
+    }
+    $data->end_transaction("DBMN");
+
+} elsif($action eq "remove-manual") {
+
+    my @spc = (1, 1, 0);
+    if( $ARGV[0] =~ /^([0-9]+)\/([0-9]+)(?::([0-9]+))?$/ ) {
+        @spc = ($1, $2, $3);
+    } else {
+        die "Unparsable page id: $ARGV[0]";
+    }
+
+    my $capture = $data->module("capture");
+    
+    $data->begin_transaction("DBRM");
+    $capture->remove_manual(@spc);
+    $capture->outdate_annotated_page(@spc);
+    $data->end_transaction("DBRM");
+    
+}
