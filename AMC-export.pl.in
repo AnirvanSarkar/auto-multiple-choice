@@ -45,18 +45,37 @@ my $sort            = 'n';
 my $useall          = 1;
 my $rtl             = '';
 
+my $o_out_csv = { ticked => undef, };
+my $o_out_ods = {
+    stats      => undef,
+    statsindic => undef,
+    groupsums  => undef,
+    groupsep   => undef,
+    filter     => undef,
+};
+
 GetProjectOptions(
-    "module=s"                         => \$module,
+    ":export_module|module=s"          => \$module,
     ":export_sort|sort=s"              => \$sort,
     ":export_include_abs|useall=s"     => \$useall,
     ":data:dir|data=s"                 => \$data_dir,
     ":listeetudiants:dir|fich-noms=s"  => \$fich_noms,
-    "association-key=s"                => \$association_key,
+    ":liste_key|association-key=s"     => \$association_key,
     ":csv_build_name|csv-build-name=s" => \$csv_build_name,
     ":liste:enc|noms-encodage=s"       => \$noms_encodage,
     ":annote_rtl|rtl!"                 => \$rtl,
     "option-out=s"                     => \@o_out,
-    "output|o=s"                       => \$output,
+
+    ":export_ods_stats|export-ods-stats=s"           => \$o_out_ods->{stats},
+    ":export_ods_statsindic|export-ods-statsindic=s" =>
+      \$o_out_ods->{statsindic},
+    ":export_ods_group|export-ods-group=s"       => \$o_out_ods->{groupsums},
+    ":export_ods_groupsep|export-ods-groupsep=s" => \$o_out_ods->{groupsep},
+    ":export_ods_filter|export-ods-filter!"      => \$o_out_ods->{filter},
+
+    ":export_csv_ticked|export-csv-ticked=s" => \$o_out_csv->{ticked},
+
+    "output|o=s" => \$output,
 );
 
 load("AMC::Export::$module");
@@ -80,6 +99,20 @@ $ex->set_options(
 );
 
 $ex->set_options( "out", rtl => $rtl );
+
+if ( $module eq 'CSV' ) {
+    for my $k ( keys %$o_out_csv ) {
+        $ex->set_options( "out", $k => $o_out_csv->{$k} )
+          if ( defined( $o_out_csv->{$k} ) );
+    }
+}
+
+if ( $module eq 'ods' ) {
+    for my $k ( keys %$o_out_ods ) {
+        $ex->set_options( "out", $k => $o_out_ods->{$k} )
+          if ( defined( $o_out_ods->{$k} ) );
+    }
+}
 
 for my $oo (@o_out) {
     if ( $oo =~ /([^=]+)=(.*)/ ) {
