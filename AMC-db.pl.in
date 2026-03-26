@@ -26,6 +26,8 @@ use File::Spec::Functions
 use File::Temp qw/ tempfile tempdir /;
 use File::Copy;
 
+use Module::Load;
+
 use AMC::Path;
 use AMC::Basic;
 use AMC::Data;
@@ -44,7 +46,7 @@ my $css_url     = '';
 my $darkness_threshold    = 0.1;
 my $darkness_threshold_up = 1.0;
 
-GetProjectOptions(
+my $options = GetProjectOptions(
     ":data:dir|data=s"       => \$data_dir,
     ":project_dir|project=s" => \$project_dir,
     "scan!"                  => \$scan,
@@ -81,6 +83,11 @@ sub transform_matrix {
 }
 
 if($action eq "upgrade") {
+
+    $options->{read_only} = '';
+    $options->{project}->{_changed} = 1;
+    debug "Saving back to ".$options->{project_file}."\n";
+    $options->save();
 
     for my $module (qw/association capture layout report scoring/) {
         $data->require_module($module);
