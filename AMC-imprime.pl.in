@@ -382,5 +382,9 @@ for my $e (@es) {
     $avance->progres( 1 / ( 1 + $#es ) );
 }
 
+$layout->begin_transaction('PTIM');
+$layout->variable('print_timestamp', time());
+$layout->end_transaction('PTIM');
+
 $avance->fin();
 
