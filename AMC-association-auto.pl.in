@@ -46,6 +46,8 @@ GetProjectOptions(
     "hard-fail!"                        => \$hard_fail,
 );
 
+$preassoc = 1 if ( $notes_id eq '<preassoc>' );
+
 die "Needs notes-id"   if ( !$notes_id && !$preassoc );
 die "Needs liste-key"  if ( !$liste_key );
 die "Needs liste_file" if ( !-s $liste_file );
