@@ -709,8 +709,7 @@ sub define_statements {
               . " AS local WHERE role=1 AND"
               . "              local.student=list.student)"
         },
-        DEFECT_NO_NAME => {
-                sql => "SELECT student FROM (SELECT student FROM "
+        DEFECT_NO_NAME => { sql => "SELECT student FROM (SELECT student FROM "
               . $self->table("page")
               . " GROUP BY student) AS list"
               . " WHERE student>0 AND"
@@ -719,7 +718,9 @@ sub define_statements {
               . " AS local"
               . "              WHERE local.student=list.student"
               . "              AND local.zone='__n')"
-        },
+              . " AND NOT EXISTS(SELECT * FROM "
+              . $self->table("association")
+              . " AS assoc WHERE assoc.student=list.student)" },
         DEFECT_SEVERAL_NAMES => {
                 sql => "SELECT student FROM (SELECT student,COUNT(*) AS n FROM "
               . $self->table("zone")
