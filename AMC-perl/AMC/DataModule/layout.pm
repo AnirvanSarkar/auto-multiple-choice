@@ -160,6 +160,19 @@ package AMC::DataModule::layout;
 # * student is the student number
 #
 # * page is the page number from the PDF
+#
+# layout_defects contains a summary of the defects that are detected
+# about the layout, computed by the method 'defects'
+#
+# * kind is the kind of defect (NO_BOX, NO_NAME, etc.)
+#
+# * h1, h2 are the hints that can be used to see where this defect can
+#   be seen
+#
+# * class represents the severity: 1 for INFO, 2 for WARNING, 2 for
+#   ERROR
+#
+# * ok is true if the user don't want to see ths issue anymore.
 
 use Exporter qw(import);
 
@@ -197,7 +210,7 @@ use XML::Simple;
 our @ISA = ("AMC::DataModule");
 
 sub version_current {
-    return (11);
+    return (12);
 }
 
 sub drop_box_table {
@@ -424,6 +437,12 @@ sub version_upgrade {
               . $self->table( "correctedpages", "self" )
               . " (page)" );
         return (11);
+    }
+    if ( $old_version == 11 ) {
+        $self->sql_do( "CREATE TABLE IF NOT EXISTS "
+              . $self->table("defects")
+              . " (kind TEXT, h1 TEXT, h2 TEXT, class INTEGER, ok INTEGER)" );
+        return (12);
     }
     return ('');
 }
@@ -947,6 +966,11 @@ sub define_statements {
         studentCPages => { sql => "SELECT page FROM "
                                . $self->table("correctedpages")
                                . " WHERE student = ?" },
+        NewDefect => { sql => "INSERT INTO "
+                           . $self->table("defects")
+                           . " (kind, class, h1, h2) VALUES (?,?,?,?)" },
+        ClearDefects => { sql => "DELETE FROM "
+                              . $self->table("defects") },
     };
 
 }
@@ -1249,9 +1273,10 @@ sub students {
     return ( $self->sql_list( $self->statement('STUDENTS') ) );
 }
 
-# defects($delta) returns a hash of the defects found in the subject:
+# defects($delta, $store) returns a hash of the defects found in the
+# subject:
 #
-# * {'NO_BOX} is a pointer on an array containing all the student
+# * {NO_BOX} is a pointer on an array containing all the student
 #   numbers for which there is no box to be filled in the subject
 #
 # * {NO_NAME} is a pointer on an array containing all the student
@@ -1269,9 +1294,12 @@ sub students {
 # * {INCOMPLETE_MULTI} is a pointer on an array of hashes containing
 #   all the student,page's where there are boxes to be checked by the
 #   student *but* no AMCcode[multi]
+#
+# If $store is true, then a summary of the results are stored in the
+# defects table.
 
 sub defects {
-    my ( $self, $delta ) = @_;
+    my ( $self, $delta, $store ) = @_;
     $delta = 0.1 if ( !defined($delta) );
     my %r     = ();
 
@@ -1301,6 +1329,30 @@ sub defects {
 
     my $pos = $self->check_positions($delta);
     $r{DIFFERENT_POSITIONS} = $pos if ($pos);
+
+    if ($store) {
+        $self->statement("ClearDefects")->execute();
+        for my $k (%r) {
+            my $dd = $r{$k};
+            if ($dd) {
+                my ($h1, $h2, $class);
+                if ( $k eq 'DIFFERENT_POSITIONS' ) {
+                    $h1 = pageids_string( $dd->{student_a}, $dd->{page_a} );
+                    $h2 = pageids_string( $dd->{student_b}, $dd->{page_b} );
+                } elsif ( $k =~ /^(OUT_OF_PAGE|INCOMPLETE_MULTI)$/ ) {
+                    $h1 = 1 + $#{$dd};
+                    $h2 =
+                      pageids_string( $dd->[0]->{student}, $dd->[0]->{page} );
+                } else {
+                    my @e = sort { $a <=> $b } ( @{$dd} );
+                    $h1 = 1 + $#e;
+                    $h2 = $e[0];
+                }
+                $class = ( $k eq 'NO_NAME' ? 2 : 3);
+                $self->statement("NewDefect")->execute($k, $class, $h1, $h2);
+            }
+        }
+    }
 
     return (%r);
 }

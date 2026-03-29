@@ -34,14 +34,16 @@ my $src;
 my $data_dir;
 my $dpi = 300;
 
-my $progress    = 0;
-my $progress_id = '';
+my $progress      = 0;
+my $progress_id   = '';
+my $store_defects = '';
 
 GetProjectOptions(
     ":doc_setting:file|src=s" => \$src,
     ":data:dir|data=s"        => \$data_dir,
     "progression-id=s"        => \$progress_id,
     "progression=s"           => \$progress,
+    "store-defects!"          => \$store_defects,
 );
 
 die "No src file $src"      if ( !-f $src );
@@ -346,6 +348,10 @@ debug "Register question numbers...";
 
 for my $qn (@questionnum) {
     $layout->question_number(@$qn);
+}
+
+if ($store_defects) {
+    $layout->defects( undef, 1 );
 }
 
 debug "Ending transaction...";
