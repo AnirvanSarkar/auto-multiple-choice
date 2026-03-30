@@ -8,51 +8,9 @@ import time
 
 os.system('gsettings set org.gnome.desktop.interface toolkit-accessibility true')
 
-import dogtail.tc
-from dogtail.procedural import *
-import dogtail.utils
-from dogtail.predicate import GenericPredicate
-from dogtail.tree import *
-
-from gi.repository import Gdk
-from pyatspi import Registry as registry
-from pyatspi import (KEY_SYM, KEY_PRESS, KEY_PRESSRELEASE, KEY_RELEASE)
-
-
-def keycodes(name):
-    keymap = Gdk.Keymap.get_for_display(Gdk.Display.get_default())
-    entries = keymap.get_entries_for_keyval(Gdk.keyval_from_name(name))
-    return [key.keycode for key in entries[1]]
-
-
-def code_to_names(code):
-    keymap = Gdk.Keymap.get_for_display(Gdk.Display.get_default())
-    entries = keymap.get_entries_for_keycode(code)
-    return [Gdk.keyval_name(i) for i in entries[2]]
-
-
-def code_to_firstname(code):
-    names = code_to_names(code)
-    if len(names) >= 1:
-        return names[0]
-    else:
-        return None
-
-
-def find_standard_code(name):
-    for i in keycodes(name):
-        if code_to_firstname(i) == name:
-            return i
-    return None
-
-
-def test_codes():
-    for i in range(100):
-        print(i, code_to_names(i))
-
-
-control_code = find_standard_code('Control_L')
-
+import dogtail
+import dogtail.rawinput
+from dogtail.tree import root
 
 class AMC:
 
@@ -157,7 +115,7 @@ class AMC:
         self.wait_sensitive(button)
         button.click()
 
-    def scroll_and_click(elf, context, value,
+    def scroll_and_click(self, context, value,
                          double=False, enter=False, hold_control=False):
         (base, scrollbar, nbparents) = context
         base.grab_focus()
@@ -178,8 +136,7 @@ class AMC:
             time.sleep(0.5)
             try:
                 if hold_control:
-                    registry.generateKeyboardEvent(
-                        control_code, None, KEY_PRESS)
+                    dogtail.rawinput.hold_key('Control_L')
                     time.sleep(0.2)
                 if double:
                     x.doubleClick()
@@ -187,11 +144,11 @@ class AMC:
                     x.click()
                     if enter:
                         time.sleep(0.2)
-                        dogtail.rawinput.pressKey('\n')
+                        dogtail.rawinput.press_key('enter')
                 if hold_control:
                     time.sleep(0.2)
-                    registry.generateKeyboardEvent(
-                        control_code, None, KEY_RELEASE)
+                    dogtail.rawinput.release_key('Control_L')
+
                 disapeared = len(base.findChildren(
                     dogtail.predicate.GenericPredicate(value))) == 0
             except:
@@ -214,13 +171,16 @@ class AMC:
                     roleName='dialog'))
             return(found[0])
         else:
-            d = found[0].findAncestor(dogtail.predicate.GenericPredicate(
-                roleName='dialog'))
-            if d:
-                return(d)
-            else:
-                return(found[0])
+            print("File choosers:", [ str(x) for x in found])
+            print("Parents:", [str(x.parent) for x in found])
+            try:
+                d = found[0].findAncestor(dogtail.predicate.GenericPredicate(
+                    roleName='dialog'), retry=False)
+            except:
+                d = found[0]
 
+            return d
+        
     def chooser_locations(self):
         loc_list = self.file_chooser_or_dialog().child(roleName='list box')
         scrollbar = loc_list.parent.parent.findChildren(
@@ -365,8 +325,11 @@ class AMC:
         dialog = self.gui.child('Template selection')
         if section is not None:
             endoc = dialog.child(section)
-            endoc.actions['expand or contract'].do()
-        dialog.child(template).click()
+            action = endoc.actions['expand or contract']
+            endoc.do_action(action)
+        scrollbar = dialog.findChildren(
+            dogtail.predicate.GenericPredicate(roleName='scroll bar'))[1]
+        self.scroll_and_click((dialog, scrollbar, 0), template)
         dialog.child('Apply').click()
 
     def new_project_from_archive(self, archive_path):
@@ -528,9 +491,10 @@ class AMC:
         # Choose mode
         choix = self.file_chooser_or_dialog()
         i = choix.menuItem(mode)
+        print("Item:", i)
         cb = i.parent.parent
-        cb.click()
-        i.click()
+        print("Menu:", cb)
+        cb.combovalue = mode
         # pre-allocation
         if prealloc:
             prealloc = [a for a in choix.findChildren(
