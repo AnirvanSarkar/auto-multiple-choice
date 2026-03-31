@@ -265,11 +265,11 @@ ifneq ($(APPICONDIR),)
 	install	   -m 0644 $(USER_GROUP) $(MAIN_LOGO).svgz $(DESTDIR)/$(APPICONDIR)/scalable/apps
 	$(foreach SIZE, $(APPICONSIZES),\
 	install	-d -m 0755 $(USER_GROUP) $(DESTDIR)/$(APPICONDIR)/$(SIZE)x$(SIZE)/apps ; \
-	install	   -m 0644 $(USER_GROUP) -T $(MAIN_LOGO)-$(SIZE).png $(DESTDIR)/$(APPICONDIR)/$(SIZE)x$(SIZE)/apps/auto-multiple-choice.png ; )
+	install	   -m 0644 $(USER_GROUP) $(MAIN_LOGO)-$(SIZE).png $(DESTDIR)/$(APPICONDIR)/$(SIZE)x$(SIZE)/apps/auto-multiple-choice.png ; )
 endif
 ifneq ($(PIXDIR),)
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PIXDIR)
-	install    -m 0644 $(USER_GROUP) -T $(MAIN_LOGO).xpm $(DESTDIR)/$(PIXDIR)/auto-multiple-choice.xpm
+	install    -m 0644 $(USER_GROUP) $(MAIN_LOGO).xpm $(DESTDIR)/$(PIXDIR)/auto-multiple-choice.xpm
 endif
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC
 	install -d -m 0755 $(USER_GROUP) $(DESTDIR)/$(PERLDIR)/AMC/Export
