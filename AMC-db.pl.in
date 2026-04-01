@@ -157,13 +157,12 @@ if($action eq "upgrade") {
         
         system_debug(
             cmd => [
-                "gs",                         "-q",
-                "-dNOPAUSE",                  "-dBATCH",
-                "-sDEVICE=pnggray",           "-dDownScaleFactor=$downscale",
-                "-r" . ( $dpi * $downscale ), "-dPDFFitPage",
-                "-dFirstPage=$page",          "-dLastPage=$page",
-                "-dUseCropBox",               "-sOutputFile=" . $dest_image,
-                "$project_dir/DOC-sujet.pdf"
+                "gs",                          "-q",
+                "-dNOPAUSE",                   "-dBATCH",
+                "-sDEVICE=pnggray",            "-dDownScaleFactor=$downscale",
+                "-r" . ( $dpi * $downscale ),  "-dFirstPage=$page",
+                "-dLastPage=$page",            "-dUseCropBox",
+                "-sOutputFile=" . $dest_image, "$project_dir/DOC-sujet.pdf"
             ]
         );
 
