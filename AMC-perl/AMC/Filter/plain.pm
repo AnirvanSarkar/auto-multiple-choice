@@ -101,7 +101,7 @@ sub new {
         questionblocks          => 1,
         shufflequestions        => 1,
         completemulti           => 1,
-        font                    => 'Linux Libertine O',
+        font                    => $ENV{AMC_TXT_DEFAULTFONT} || 'Linux Libertine O',
         arabic                  => '',
         arabicfont              => 'Rasheeq',
         implicitdefaultscoringm => 'haut=2',
