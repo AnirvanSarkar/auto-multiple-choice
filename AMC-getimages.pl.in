@@ -427,6 +427,12 @@ if ( $use{pdfimages} || $use{pdftk} || $use{qpdf} ) {
 # ImageMagick, and convert vector to bitmap
 
 @fs = ();
+
+if(@fs) {
+    $dp = 1 / ( 1 + $#fs );
+    $p->text( __("Pre-process images...") ) if ($p);
+}
+
 for my $fich (@f) {
     check_split_path($fich);
 
@@ -586,7 +592,11 @@ for my $fich (@f) {
             push @fs, $fich;
         }
     }
+
+    $p->progres($dp) if ($p);
 }
+
+$p->text('') if($p);
 
 @f = @fs;
 
