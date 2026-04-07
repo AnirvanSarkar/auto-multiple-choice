@@ -1040,8 +1040,8 @@ if ( $to_do{s} ) {
         command_opts => [ %global_opts, SujetExterne => 1 ],
         text         => __ "Building the question sheet"
     );
-    analyse_amclog("$build_dir/$jobname.amc");
     give_latex_errors( __ "question sheet" );
+    analyse_amclog("$build_dir/$jobname.amc");
 
     if ( $a_errors > 0 ) {
         debug("$a_errors errors detected: EXIT");
