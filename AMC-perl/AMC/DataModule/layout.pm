@@ -745,6 +745,11 @@ sub define_statements {
               . $self->table("page")
               . " WHERE student=? AND page=?"
         },
+        pageDPI => {
+                sql => "SELECT dpi FROM "
+              . $self->table("page")
+              . " WHERE student=? AND page=?"
+        },
         students => {
                 sql => "SELECT student FROM "
               . $self->table("page")
@@ -972,6 +977,9 @@ sub define_statements {
                            . " (kind, class, h1, h2) VALUES (?,?,?,?)" },
         ClearDefects => { sql => "DELETE FROM "
                               . $self->table("defects") },
+        questionZone => { sql=> "SELECT * FROM "
+                              . $self->table("box")
+                              . " WHERE student=? AND page=? AND role=? AND question=?" },
     };
 
 }
@@ -1726,6 +1734,30 @@ sub add_correctedpage {
 sub student_correctedpages {
     my ( $self, $student ) = @_;
     return ( $self->sql_list( $self->statement('studentCPages'), $student ) );
+}
+
+# question_viewbox($student, $page, $question) returns a viewbox (as
+# an array (xmin, ymin, width, height)) that allows to see the given
+# question
+
+sub question_viewbox {
+    my ( $self, $student, $page, $question, $delta_inches ) = @_;
+    my $dims = $self->dbh->selectrow_hashref( $self->statement('questionZone'),
+        {}, $student, $page, BOX_ROLE_QUESTIONTEXT, $question );
+
+    die "Question viewBox not found!" if ( !$dims );
+
+    my $dpi = $self->sql_single( $self->statement('pageDPI'), $student, $page );
+    if ( !defined($delta_inches) ) {
+        $delta_inches = 0.2    # default ~ 5mm
+    }
+    my $delta = $dpi * $delta_inches;
+    return (
+        $dims->{xmin} - $delta,
+        $dims->{ymin} - $delta,
+        $dims->{xmax} - $dims->{xmin} + 2 * $delta,
+        $dims->{ymax} - $dims->{ymin} + 2 * $delta
+    );
 }
 
 1;

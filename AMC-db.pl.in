@@ -33,16 +33,18 @@ use AMC::Basic;
 use AMC::Data;
 use AMC::DataModule::layout ':flags';
 
-my $project_dir = '';
-my $data_dir    = '';
-my $scan        = '';
-my $dpi         = 200;
-my $downscale   = 2;
-my $scan_type   = 'jpg';
-my $image_type  = 'png';
-my $dest_file   = '';
-my $url_prefix  = '';
-my $css_url     = '';
+my $project_dir  = '';
+my $data_dir     = '';
+my $scan         = '';
+my $dpi          = 200;
+my $downscale    = 2;
+my $scan_type    = 'jpg';
+my $image_type   = 'png';
+my $dest_file    = '';
+my $url_prefix   = '';
+my $css_url      = '';
+my $delta_inches = 0.15;
+my $question_number       = '';
 my $darkness_threshold    = 0.1;
 my $darkness_threshold_up = 1.0;
 
@@ -56,6 +58,8 @@ my $options = GetProjectOptions(
     "css-url=s"              => \$css_url,
     ":seuil|seuil=s"         => \$darkness_threshold,
     ":seuil_up|seuil-up=s"   => \$darkness_threshold_up,
+    "question-number=s"      => \$question_number,
+    "delta-inches=s"         => \$delta_inches,
 );
 
 die "Needs data directory" if ( !$data_dir );
@@ -176,7 +180,15 @@ if($action eq "upgrade") {
     $data->begin_read_transaction("DBBX");
 
     open(SVG, ">", "$dest_file.svg");
-    print SVG "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 $width $height\">\n";
+    print SVG "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"";
+    if ($question_number) {
+        print SVG join( " ",
+            $layout->question_viewbox( @ep, $question_number, $delta_inches ) );
+    }
+    else {
+        print SVG "0 0 $width $height";
+    }
+    print SVG "\">\n";
     print SVG '<link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" href="'.$css_url.'" type="text/css" />'. "\n" if($css_url);
     print SVG "<image x=\"0\" y=\"0\" ";
     print SVG "width=\"$width\" height=\"$height\" "
