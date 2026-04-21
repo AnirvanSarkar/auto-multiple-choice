@@ -519,6 +519,8 @@ sub defaults {
         pdf_password_key => '',
 
         name_field_type => '',
+
+        uuid => '',
     };
 
     # MacOSX universal command to open files or directories : /usr/bin/open
@@ -831,7 +833,10 @@ sub open_project {
     # clear deprecated bug-related stuff
     for ( keys %{ $self->{project} } ) {
         delete( $self->{project}->{$_} )
-          if ( $_ !~ /^ext_/ && !exists( $self->{project_default}->{$_} ) );
+          # allows options handled by extensions (ext_*) or webapp (app_*)
+          if ( $_ !~ /^ext_/
+            && $_ !~ /^app_/
+            && !exists( $self->{project_default}->{$_} ) );
         $self->{project}->{_changed} = 1;
     }
 
