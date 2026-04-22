@@ -55,6 +55,7 @@ my $students_list_key   = '';
 my $password_key        = '';
 my $student_min         = -1;
 my $student_max         = -1;
+my $job_prefix          = '';
 
 GetProjectOptions(
     ":data:dir|data=s"                     => \$data_dir,
@@ -76,6 +77,7 @@ GetProjectOptions(
     ":listeetudiants:file|students-list=s" => \$students_list,
     ":liste_key|list-key=s"                => \$students_list_key,
     ":pdf_password_key|password-key=s"     => \$password_key,
+    ":job_prefix|job-prefix=s"             => \$job_prefix,
 );
 
 my $commandes = AMC::Exec::new('AMC-imprime');
@@ -294,7 +296,14 @@ sub process_pages {
     }
 
     if ( $methode =~ /^cups/i ) {
-        $cups->print_file( $fn, "QCM : sheet $elong [$suffix]" );
+        my $label;
+        if($job_prefix) {
+            $label = $job_prefix . $elong;
+            $label .= "-$suffix" if($suffix);
+        } else {
+            $label = "QCM : sheet $elong [$suffix]";
+        }
+        $cups->print_file( $fn, $label );
     } elsif ( $methode =~ /^file/i ) {
         if ( $f_dest !~ /[%]e/ ) {
             if ( -d $f_dest ) {

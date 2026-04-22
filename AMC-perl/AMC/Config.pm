@@ -520,7 +520,8 @@ sub defaults {
 
         name_field_type => '',
 
-        uuid => '',
+        uuid       => '',
+        job_prefix => '',
     };
 
     # MacOSX universal command to open files or directories : /usr/bin/open
