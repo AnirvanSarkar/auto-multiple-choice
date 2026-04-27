@@ -99,6 +99,9 @@ if($action eq "upgrade") {
 
 } elsif($action eq "clear") {
 
+    for my $module (qw/association capture layout scoring/) {
+        $data->require_module($module);
+    }
     $data->clear_data($project_dir, $ARGV[0]);
 
 } elsif($action eq "layout-image") {
