@@ -84,6 +84,7 @@ my $out_sujet         = '';
 my $out_corrige       = '';
 my $out_corrige_indiv = '';
 my $out_catalog       = '';
+my $out_log           = '';
 
 my $jobname = "amc-compiled";
 
@@ -105,6 +106,7 @@ GetProjectOptions(
     ":doc_solution:file|out-corrige=s"             => \$out_corrige,
     ":doc_indiv_solution:file|out-corrige-indiv=s" => \$out_corrige_indiv,
     ":doc_catalog:file|out-catalog=s"              => \$out_catalog,
+    "log=s"                                        => \$out_log,
     "latex-stdout!"                                => \$latex_stdout,
     "progression=s"                                => \$progress,
     "progression-id=s"                             => \$progress_id,
@@ -252,6 +254,10 @@ sub flush_errors {
 my %info_vars = ();
 
 sub relay_info_vars {
+
+    if($out_log) {
+        transfer("$build_dir/$jobname.log", $out_log);
+    }
 
     # Relays variables to calling process
 
@@ -875,6 +881,7 @@ sub do_filter {
 
 sub give_latex_errors {
     my ($context) = @_;
+    print "VAR: latex_errors=".(1+$#latex_errors)."\n";
     if (@latex_errors) {
         print "ERR: <i>"
           . sprintf( __("%d errors during LaTeX compiling") . " (%s)</i>\n",
