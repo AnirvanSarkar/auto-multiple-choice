@@ -99,6 +99,17 @@ sub format_markup {
 
 sub mini { ( $_[0] < $_[1] ? $_[0] : $_[1] ) }
 
+sub maybe_to_monospace {
+    my ($self, $s) = @_;
+    if ( $s !~ /<i>/ ) {
+        $s = "<span face=\"monospace\">" . $self->format_markup($s) . "</span>";
+    }
+    else {
+        $s = $self->format_markup($s);
+    }
+    return ($s);
+}
+
 sub problems_markup {
     my ($self)  = (@_);
     my @err     = $self->erreurs();
@@ -108,10 +119,10 @@ sub problems_markup {
         $message .= "\n\n"
           . __("<b>Errors</b>") . "\n"
           . join( "\n",
-            map { $self->format_markup($_) } ( @err[ 0 .. mini( 9, $#err ) ] ) )
+            map { $self->maybe_to_monospace($_) } ( @err[ 0 .. mini( 8, $#err ) ] ) )
           . (
             $#err > 9
-            ? "\n\n<i>(" . __("Only first ten errors written") . ")</i>"
+            ? "\n\n<i>(" . __("Only first errors written") . ")</i>"
             : ""
           );
     }
@@ -123,7 +134,7 @@ sub problems_markup {
               ( @warn[ 0 .. mini( 9, $#warn ) ] ) )
           . (
             $#warn > 9
-            ? "\n\n<i>(" . __("Only first ten warnings written") . ")</i>"
+            ? "\n\n<i>(" . __("Only first warnings written") . ")</i>"
             : ""
           );
     }

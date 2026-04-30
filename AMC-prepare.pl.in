@@ -638,6 +638,8 @@ sub execute {
 
         $a_errors     = 0;
         @latex_errors = ();
+        my $current_err_line;
+        my $next_err_lines = 0;
 
         debug "%%% Compiling: pass $n_run";
 
@@ -653,7 +655,8 @@ sub execute {
         EXEC->autoflush(1);
 
         while (<EXEC>) {
-
+            utf8::decode($_);
+            
             # use of latexmk
             $latexmk = 1 if(/^Latexmk:/);
 
@@ -702,10 +705,13 @@ sub execute {
 
             # Lines beginning with '!' are errors: collect them
 
-            if (/^\!\s*(.*)$/) {
-                my $e = $1;
-                $e .= "..." if ( $e !~ /\.$/ );
-                push @latex_errors, $e;
+            if ($next_err_lines > 0) {
+                push @$current_err_line, $_;
+                $next_err_lines--;
+            } elsif (/^\!\s*(.*)$/) {
+                $current_err_line = [ $_ ];
+                push @latex_errors, $current_err_line;
+                $next_err_lines = 2;
             }
 
             # detect style file path
@@ -873,8 +879,10 @@ sub give_latex_errors {
         print "ERR: <i>"
           . sprintf( __("%d errors during LaTeX compiling") . " (%s)</i>\n",
             ( 1 + $#latex_errors ), $context );
-        for (@latex_errors) {
-            print "ERR>$_\n";
+        for my $e (@latex_errors) {
+            for (@$e) {
+                print "ERR>$_\n";
+            }
         }
         exit_with_error();
     }
