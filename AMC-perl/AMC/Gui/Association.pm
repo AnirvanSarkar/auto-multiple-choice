@@ -75,6 +75,7 @@ sub new {
         fin                => '',
         size_prefs         => '',
         rtl                => '',
+        multiple_copies    => '',
     };
 
     for ( keys %o ) {
@@ -481,7 +482,7 @@ sub maj_contenu_liste_sc {
 # {IN:}
 sub maj_couleurs_liste {    # mise a jour des couleurs la liste
     my ($self) = @_;
-    my $counts = $self->{assoc}->counts_hash();
+    my $counts = $self->{assoc}->counts_hash($self->{multiple_copies});
     my $iter   = $self->{copies_store}->get_iter_first();
     my $ok     = defined($iter);
     while ($ok) {
@@ -567,7 +568,7 @@ sub delie {
 # {IN:}
 sub lie {
     my ( $self, $inom, $student, $copy ) = (@_);
-    $self->delie($inom);
+    $self->delie($inom) if(!$self->{multiple_copies});
     my $oldcode = $self->{assoc}->get_real( $student, $copy );
     $self->{assoc}->set_manual( $student, $copy, $self->inom2code($inom) );
 
@@ -847,14 +848,23 @@ sub style_bouton {
         }
     }
 
+    my $code = $self->inom2code($i);
     my $pris =
-      studentids_string( $self->{assoc}->real_back( $self->inom2code($i) ) );
+      studentids_string( $self->{assoc}->real_back( $code ) );
     $self->{taken_list}->[$i] = $pris;
 
     my $b  = $self->{boutons}->[$i];
     my $eb = $self->{boutons_eb}->[$i];
     if ($b) {
-        if ($pris) {
+        if($self->{multiple_copies}) {
+            $b->set_relief($actif ? 'GTK_RELIEF_NONE' : 'GTK_RELIEF_NORMAL');
+            $b->override_background_color( 'prelight',
+                ( $actif ? $col_actif : undef ) );
+            my $suffix = '';
+            my $n = $self->{assoc}->n_real_back( $code );
+            $suffix = " ($n)" if($n);
+            $b->get_child()->set_text( $self->{liste}->data_n( $i, '_ID_' ) . $suffix );
+        } elsif ($pris) {
             $b->set_relief('GTK_RELIEF_NONE');
             $b->override_background_color( 'prelight',
                 ( $actif ? $col_actif : $col_pris ) );

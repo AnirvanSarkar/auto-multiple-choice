@@ -478,6 +478,7 @@ sub defaults {
 
         liste_key  => '',
         assoc_code => '',
+        multiple_copies => '',
 
         moteur_latex_b => '',
 

@@ -35,11 +35,11 @@ our @ISA = ("AMC::Messages");
 use_gettext;
 
 my %sorting = (
-    l => ['n:student.line'],
-    'm' => [ 'n:mark', 's:student.name', 'n:student.line' ],
-    'r' => [ 'nr:mark', 's:student.name', 'n:student.line' ],
+    l => ['n:student.line', 'n:student', 'n:copy'],
+    'm' => [ 'n:mark', 's:student.name', 'n:student.line', 'n:student', 'n:copy' ],
+    'r' => [ 'nr:mark', 's:student.name', 'n:student.line', 'n:student', 'n:copy' ],
     i => [ 'n:student', 'n:copy', 'n:student.line' ],
-    n => [ 's:student.name', 'n:student.line' ],
+    n => [ 's:student.name', 'n:student.line', 'n:student', 'n:copy' ],
 );
 
 sub new {
@@ -61,7 +61,7 @@ sub new {
 
         'out.rtl' => '',
 
-        'sort.keys' => [ 's:student.name', 'n:student.line' ],
+        'sort.keys' => [ 's:student.name', 'n:student.line', 'n:student', 'n:copy' ],
         'sort.cols' => 'smart',
 
         marks => [],

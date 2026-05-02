@@ -26,24 +26,26 @@ use AMC::Basic;
 use AMC::NamesFile;
 use AMC::Data;
 
-my $notes_id       = '';
-my $liste_file     = '';
-my $liste_key      = '';
-my $liste_enc      = 'utf-8';
-my $csv_build_name = '';
-my $data_dir       = '';
-my $preassoc       = '';
-my $hard_fail      = '';
+my $notes_id        = '';
+my $liste_file      = '';
+my $liste_key       = '';
+my $liste_enc       = 'utf-8';
+my $csv_build_name  = '';
+my $data_dir        = '';
+my $preassoc        = '';
+my $hard_fail       = '';
+my $multiple_copies = '';
 
 GetProjectOptions(
-    ":assoc_code|notes-id=s"            => \$notes_id,
-    ":pre_association|pre-association!" => \$preassoc,
-    ":listeetudiants:dir|liste=s"       => \$liste_file,
-    ":liste_key|liste-key=s"            => \$liste_key,
-    ":csv_build_name|csv-build-name=s"  => \$csv_build_name,
-    ":data:dir|data=s"                  => \$data_dir,
-    ":liste:enc|encodage-liste=s"       => \$liste_enc,
-    "hard-fail!"                        => \$hard_fail,
+    ":assoc_code|notes-id=s"                 => \$notes_id,
+    ":pre_association|pre-association!"      => \$preassoc,
+    ":listeetudiants:dir|liste=s"            => \$liste_file,
+    ":liste_key|liste-key=s"                 => \$liste_key,
+    ":csv_build_name|csv-build-name=s"       => \$csv_build_name,
+    ":data:dir|data=s"                       => \$data_dir,
+    ":liste:enc|encodage-liste=s"            => \$liste_enc,
+    ":multiple_copies:bool|multiple-copies!" => \$multiple_copies,
+    "hard-fail!"                             => \$hard_fail,
 );
 
 $preassoc = 1 if ( $notes_id eq '<preassoc>' );
@@ -102,7 +104,10 @@ $assoc->clear_auto;
 
 my $return_code = 0;
 
-my $sth = $scoring->statement( $preassoc ? 'preAssocCounts' : 'codesCounts' );
+my $sth =
+  $scoring->statement( $preassoc ? 'preAssocCounts'
+    : $multiple_copies ? 'codesValues'
+    :                    'codesCounts' );
 if ($preassoc) {
     $sth->execute();
 } else {
@@ -111,8 +116,11 @@ if ($preassoc) {
 while ( my $v = $sth->fetchrow_hashref ) {
     if ( $v->{nb} == 1 ) {
 
-        # nb is the number of scans on which the same code value has been
-        # read. If nb=1, this is OK: we can process association...
+        # nb is the number of scans on which the same code value has
+        # been read. If nb=1, this is OK: we can process
+        # association...  We also process association if
+        # --multiple-copies is used, in such case multiple copies for
+        # the same student are allowed.
 
         my $id_in_list = $bon_code{ clean_id( $v->{value} ) };
         if ( defined($id_in_list) ) {

@@ -868,14 +868,22 @@ sub check_assoc {
 
     my %p = ( %{ $self->{check_assoc} } );
 
+    my %assoc_exists = ();
+
     for my $m ( @{ $self->{association} } ) {
         my $st = studentids_string( $m->{student}, $m->{copy} );
+        $assoc_exists{$st} = 1;
         delete( $p{$st} )
           if ( defined( $p{$st} )
             && compare( $self->{check_assoc}->{$st}, $m->{auto} ) );
         delete( $p{ 'm:' . $st } )
           if ( defined( $p{ 'm:' . $st } )
             && compare( $self->{check_assoc}->{ 'm:' . $st }, $m->{manual} ) );
+    }
+
+    for my $st ( keys %p ) {
+        delete $p{$st}
+          if ( $self->{check_assoc}->{$st} eq 'x' && !$assoc_exists{$st} );
     }
 
     my @no = ( keys %p );

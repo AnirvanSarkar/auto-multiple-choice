@@ -4054,11 +4054,12 @@ sub associe {
     return () if ( !$self->check_possible_assoc(0) );
     if ( -f $self->get_absolute('listeetudiants') ) {
         my $ga = AMC::Gui::Association::new(
-            cr          => $self->get_absolute('cr'),
-            data_dir    => $self->get_absolute('data'),
-            liste       => $self->get_absolute('listeetudiants'),
-            liste_key   => $self->get('liste_key'),
-            identifiant => $self->{project}->csv_build_name(),
+            cr              => $self->get_absolute('cr'),
+            data_dir        => $self->get_absolute('data'),
+            liste           => $self->get_absolute('listeetudiants'),
+            liste_key       => $self->get('liste_key'),
+            multiple_copies => $self->get('multiple_copies'),
+            identifiant     => $self->{project}->csv_build_name(),
 
             'fichier-liens'  => $self->get_absolute('association'),
             global           => 0,
@@ -4069,9 +4070,8 @@ sub associe {
             fin              => sub {
                 $self->assoc_state();
             },
-            size_prefs => (
-                $self->get('conserve_taille') ? $self->{config} : ''
-            ),
+            size_prefs =>
+              ( $self->get('conserve_taille') ? $self->{config} : '' ),
         );
         if ( $ga->{erreur} ) {
             my $dialog = Gtk3::MessageDialog->new( $self->get_ui('main_window'),

@@ -24,28 +24,30 @@ use 5.012;
 use Getopt::Long;
 use AMC::Basic;
 
-my $cr_dir   = '';
-my $liste    = '';
-my $data_dir = '';
-my $list     = '';
-my $set      = '';
-my $set_from = '';
-my $student  = '';
-my $copy     = '';
-my $id       = undef;
-my $raw      = '';
+my $cr_dir          = '';
+my $liste           = '';
+my $data_dir        = '';
+my $list            = '';
+my $set             = '';
+my $set_from        = '';
+my $student         = '';
+my $copy            = '';
+my $id              = undef;
+my $raw             = '';
+my $multiple_copies = '';
 
 GetProjectOptions(
-    ":cr:dir|cr=s"                => \$cr_dir,
-    ":listeetudiants:dir|liste=s" => \$liste,
-    ":data:dir|data=s"            => \$data_dir,
-    "list!"                       => \$list,
-    "raw!"                        => \$raw,
-    "set!"                        => \$set,
-    "set-from=s"                  => \$set_from,
-    "student=s"                   => \$student,
-    "copy=s"                      => \$copy,
-    "id=s"                        => \$id,
+    ":cr:dir|cr=s"                           => \$cr_dir,
+    ":listeetudiants:dir|liste=s"            => \$liste,
+    ":data:dir|data=s"                       => \$data_dir,
+    ":multiple_copies:bool|multiple-copies!" => \$multiple_copies,
+    "list!"                                  => \$list,
+    "raw!"                                   => \$raw,
+    "set!"                                   => \$set,
+    "set-from=s"                             => \$set_from,
+    "student=s"                              => \$student,
+    "copy=s"                                 => \$copy,
+    "id=s"                                   => \$id,
 );
 
 debug("AMC-association / DEBUG") if (get_debug());
@@ -139,10 +141,11 @@ if ($list) {
     require AMC::Gui::Association;
 
     my $g = AMC::Gui::Association::new(
-        cr       => $cr_dir,
-        liste    => $liste,
-        data_dir => $data_dir,
-        global   => 1,
+        cr              => $cr_dir,
+        liste           => $liste,
+        data_dir        => $data_dir,
+        global          => 1,
+        multiple_copies => $multiple_copies,
     );
 
     Gtk3->main;

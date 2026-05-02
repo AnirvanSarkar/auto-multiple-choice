@@ -665,6 +665,12 @@ sub define_statements {
               . $self->table("code")
               . " WHERE code=? GROUP BY value"
         },
+        codesValues => {
+                sql => "SELECT student,copy,value,1 as nb"
+              . " FROM "
+              . $self->table("code")
+              . " WHERE code=?"
+        },
         preAssocCounts => {
                 sql => "SELECT m.student,m.copy,l.id AS value,COUNT(*) AS nb"
               . " FROM "

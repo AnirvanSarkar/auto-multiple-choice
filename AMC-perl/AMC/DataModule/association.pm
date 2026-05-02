@@ -193,6 +193,13 @@ sub define_statements {
               . " ) AS c"
               . " ON t.real=c.real"
         },
+        NrealBack => {
+                sql => "SELECT count(*) FROM ( SELECT CASE"
+              . " WHEN manual IS NOT NULL THEN manual"
+              . " ELSE auto END AS real, student, copy"
+              . " FROM $at"
+              . " ) WHERE real=?||''"
+        },
         realBack => {
                 sql => "SELECT student,copy FROM ( SELECT CASE"
               . " WHEN manual IS NOT NULL THEN manual"
@@ -350,6 +357,14 @@ sub check_keys {
     }
 }
 
+# n_real_back($code) returns the number of answer sheets that are
+# currently associated with the student ID $code.
+
+sub n_real_back {
+    my ( $self, $code ) = @_;
+    return( $self->sql_single( $self->statement('NrealBack'), $code ) );
+}
+
 # real_back($code) returns the (student,copy) list corresponding to
 # the answer sheet that is currently associated with the student ID
 # $code.
@@ -406,7 +421,7 @@ sub state {
 # color  -> color used in copies list
 
 sub counts_hash {
-    my ($self) = @_;
+    my ($self, $multiple_copies) = @_;
     my $r = {};
     for my $l (
         @{
@@ -427,7 +442,8 @@ sub counts_hash {
                 $etat == 0
                 ? ( defined( $l->{manual} )
                       && $l->{manual} eq 'NONE' ? 'salmon' : undef )
-                : $etat == 1 ? ( $l->{manual} ? 'lightgreen' : 'lightblue' )
+                : $etat == 1 || $multiple_copies
+                  ? ( $l->{manual} ? 'lightgreen' : 'lightblue' )
                 :              'salmon'
             ),
         };
