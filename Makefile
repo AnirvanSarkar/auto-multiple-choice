@@ -85,7 +85,7 @@ SUBMODS=$(notdir $(shell find models -mindepth 1 -maxdepth 1 -type d))
 MODS_IN=$(wildcard AMC-*.pl.in)
 MODS=$(MODS_IN:.pl.in=.pl)
 GLADE_IN=$(wildcard AMC-perl/AMC/Gui/*.glade.in)
-PYCACHE=tests/gui/dogtail/__pycache__
+PYCACHE=tests/gui/dogtail/__pycache__ tests/gui/dogtail/venv
 
 # list *.in files for @/VAR/@ substitution
 
