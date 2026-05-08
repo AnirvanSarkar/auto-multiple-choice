@@ -30,6 +30,7 @@ use AMC::Exec;
 my $single_output  = '';
 my $sort           = '';
 my $filename_model = '(N)-(ID)';
+my $dont_overwrite = '';
 my $force_ascii    = 0;
 
 my $pdf_subject   = '';
@@ -107,6 +108,7 @@ GetProjectOptions(
     ":seuil|darkness-threshold=s"              => \$darkness_threshold,
     ":seuil_up|darkness-threshold-up=s"        => \$darkness_threshold_up,
     ":modele_regroupement|filename-model=s"    => \$filename_model,
+    ":annotate_dont_overwrite:bool|dont-overwrite!" => \$dont_overwrite,              
     ":ascii_filenames:bool|force-ascii!"       => \$force_ascii,
     "single-output=s"                          => \$single_output,
     ":export_sort|sort=s"                      => \$sort,
@@ -220,6 +222,7 @@ my $annotate = AMC::Annotate::new(
     pdf_dir                    => $pdf_dir,
     single_output              => $single_output,
     filename_model             => $filename_model,
+    dont_overwrite             => $dont_overwrite,                              
     force_ascii                => $force_ascii,
     pdf_subject                => $pdf_subject,
     names_file                 => $names_file,

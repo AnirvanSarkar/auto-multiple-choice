@@ -468,6 +468,7 @@ sub defaults {
         regroupement_compose => '',
         regroupement_type    => 'STUDENTS',
         regroupement_copies  => 'ALL',
+        annotate_dont_overwrite => '',
 
         note_null        => 0,
         note_min         => '',

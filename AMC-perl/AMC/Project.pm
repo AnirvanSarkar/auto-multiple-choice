@@ -459,6 +459,12 @@ sub annotate {
         );
     }
 
+    $self->{config}->set( 'annotate_dont_overwrite',
+        $self->{config}->get('regroupement_copies') eq 'DONT_OVERWRITE'
+        ? 1
+        : '' );
+    $self->{config}->save();
+
     $self->commande(
         commande => [
             "auto-multiple-choice",

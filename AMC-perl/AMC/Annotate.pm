@@ -55,6 +55,7 @@ sub new {
         pdf_dir                => '',
         single_output          => '',
         filename_model         => '(N)-(ID)',
+        dont_overwrite         => '',
         force_ascii            => '',
         pdf_subject            => '',
         names_file             => '',
@@ -1240,6 +1241,12 @@ sub process_student {
             }
             return ();
         }
+
+        if($self->{dont_overwrite} && (-f $path)) {
+            debug "Don't overwrite $path";
+            return ();
+        }
+        
         $self->command("output $path");
     }
 
