@@ -5204,7 +5204,7 @@ along with Auto-Multiple-Choice.  If not, see
 \DeclareOptionX{correc}{\AMC@correcheadtrue\AMC@correctrue}
 \DeclareOptionX{modele}{\AMC@correcheadtrue\AMC@correcfalse\AMC@ordretrue}
 \DeclareOptionX{correcindiv}{\AMC@correctrue}
-\DeclareOptionX{init}{\AMC@SR@time}
+\DeclareOptionX{init}{\ifx\NoWatermarkExterne\undefined\relax\AMC@SR@time\fi}
 \DeclareOptionX{bloc}{\AMC@qbloctrue}
 \DeclareOptionX{completemulti}{\AMCcomplete@multitrue}
 \DeclareOptionX{insidebox}{\AMC@inside@boxtrue}
