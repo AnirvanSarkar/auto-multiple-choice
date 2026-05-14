@@ -313,6 +313,7 @@ sub defaults {
         bw_threshold         => 0.6,
         ignore_red           => 0,
         try_three            => 1,
+        report_image         => '',
         defaut_multi_scan_mode   => 'strict',
 
         prepare_solution       => 1,
