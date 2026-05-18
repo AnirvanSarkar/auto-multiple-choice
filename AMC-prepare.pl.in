@@ -86,7 +86,8 @@ my $out_corrige_indiv = '';
 my $out_catalog       = '';
 my $out_log           = '';
 
-my $jobname = "amc-compiled";
+my $add_package_options = '';
+my $jobname             = "amc-compiled";
 
 my $source = '';
 my $f_tex;
@@ -94,29 +95,30 @@ my $f_tex;
 my $epoch = '';
 
 GetProjectOptions(
-    "mode=s"                                       => \$mode,
-    ":moteur_latex|with=s"                         => \$latex_engine,
-    ":data:dir|data=s"                             => \$data_dir,
-    "calage=s"                                     => \$calage,
-    ":texsrc:file|source=s"                        => \$source,
-    ":jobname|jobname=s"			   => \$jobname,
-    ":build_dir:dir|builddir=s"                    => \$build_dir,
-    ":doc_setting:file|out-calage=s"               => \$out_calage,
-    ":doc_question:file|out-sujet=s"               => \$out_sujet,
-    ":doc_solution:file|out-corrige=s"             => \$out_corrige,
-    ":doc_indiv_solution:file|out-corrige-indiv=s" => \$out_corrige_indiv,
-    ":doc_catalog:file|out-catalog=s"              => \$out_catalog,
-    "log=s"                                        => \$out_log,
-    "latex-stdout!"                                => \$latex_stdout,
-    "progression=s"                                => \$progress,
-    "progression-id=s"                             => \$progress_id,
-    ":project_dir|prefix=s"                        => \$prefix,
-    "n-procs=s"                                    => \$n_procs,
-    ":nombre_copies|n-copies=s"                    => \$number_of_copies,
-    ":filter|filter=s"                             => \$filter,
-    ":filtered_source:file|filtered-source=s"      => \$filtered_source,
-    "codedigit=s"                                  => \$codedigit,
-    "epoch=s"                                      => \$epoch,
+    "mode=s"                                           => \$mode,
+    ":moteur_latex|with=s"                             => \$latex_engine,
+    ":data:dir|data=s"                                 => \$data_dir,
+    "calage=s"                                         => \$calage,
+    ":texsrc:file|source=s"                            => \$source,
+    ":jobname|jobname=s"                               => \$jobname,
+    ":build_dir:dir|builddir=s"                        => \$build_dir,
+    "global:add_package_options|add-package-options=s" => \$add_package_options,
+    ":doc_setting:file|out-calage=s"                   => \$out_calage,
+    ":doc_question:file|out-sujet=s"                   => \$out_sujet,
+    ":doc_solution:file|out-corrige=s"                 => \$out_corrige,
+    ":doc_indiv_solution:file|out-corrige-indiv=s"     => \$out_corrige_indiv,
+    ":doc_catalog:file|out-catalog=s"                  => \$out_catalog,
+    "log=s"                                            => \$out_log,
+    "latex-stdout!"                                    => \$latex_stdout,
+    "progression=s"                                    => \$progress,
+    "progression-id=s"                                 => \$progress_id,
+    ":project_dir|prefix=s"                            => \$prefix,
+    "n-procs=s"                                        => \$n_procs,
+    ":nombre_copies|n-copies=s"                        => \$number_of_copies,
+    ":filter|filter=s"                                 => \$filter,
+    ":filtered_source:file|filtered-source=s"          => \$filtered_source,
+    "codedigit=s"                                      => \$codedigit,
+    "epoch=s"                                          => \$epoch,
 );
 
 $source = $ARGV[0] if ( !$source );
@@ -137,6 +139,9 @@ if ($err && @$err) {
 debug("AMC-prepare / DEBUG") if (get_debug());
 
 my %global_opts = (qw/NoWatermarkExterne 1 NoHyperRef 1/);
+
+$global_opts{AMCPackageOptionsExterne} = $add_package_options
+  if ($add_package_options);
 
 # Split the LaTeX engine string, to get
 #

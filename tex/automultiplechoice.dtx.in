@@ -135,7 +135,7 @@ along with Auto-Multiple-Choice.  If not, see
 % \DoNotIndex{\NewEnviron,\newenvironment,\newif,\newlength,\newtoks}
 % \DoNotIndex{\newwrite,\noexpand,\noindent,\number,\openout,\PackageWarning}
 % \DoNotIndex{\page,\pagestyle,\paperheight,\paperwidth,\par,\pdflastxpos}
-% \DoNotIndex{\pdflastypos,\pdfsavepos,\ProcessOptionsX,\protect}
+% \DoNotIndex{\pdflastypos,\pdfsavepos,\ProcessOptionsX,\ExecuteOptionsX,\protect}
 % \DoNotIndex{\protected@write,\providecommand,\put,\ref,\relax}
 % \DoNotIndex{\renewcommand,\repeat,\RequirePackage,\romannumeral,\rotatebox}
 % \DoNotIndex{\sc,\selectfont,\setbox,\setcounter,\setkeys,\setlength}
@@ -5233,6 +5233,8 @@ along with Auto-Multiple-Choice.  If not, see
 \DeclareOptionX{codedigit}{\AMCcodeID@@{#1}}
 \newif\ifAMC@survey\AMC@surveyfalse
 \DeclareOptionX{survey}{\AMC@surveytrue}
+\ifx\AMCPackageOptionsExterne\undefined\else%
+  \expandafter\ExecuteOptionsX\expandafter{\AMCPackageOptionsExterne}\fi
 \ProcessOptionsX
 \ifAMCneeds@storebox
   \RequirePackage{storebox}\AtBeginDocument{{}}%

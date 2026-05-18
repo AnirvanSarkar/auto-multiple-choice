@@ -319,6 +319,7 @@ sub defaults {
         prepare_solution       => 1,
         prepare_indiv_solution => 1,
         prepare_catalog        => 1,
+        add_package_options    => '',
 
         symboles_trait       => 2,
         symboles_indicatives => '',
