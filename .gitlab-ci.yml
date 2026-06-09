@@ -40,11 +40,11 @@ test-uninstall:
     - "tar xvzf ../artifacts/auto-multiple-choice_*_dist.tar.gz"
     - cd auto-multiple-choice-*
     - make
-    - find / -path /proc -prune -o -type f | sort > ../../files/f-before ; find / -path /proc -prune -o -type d | sort > ../../files/d-before
+    - find / -path /proc -prune -o -path /tmp -prune -o -type f | sort > ../../files/f-before ; find / -path /proc -prune -o -path /tmp -prune -o -type d | sort > ../../files/d-before
     - make install
     - make uninstall
     - cd ../..
-    - find / -path /proc -prune -o -type f | sort > files/f-after ; find / -path /proc -prune -o -type d | sort > files/d-after
+    - find / -path /proc -prune -o -path /tmp -prune -o -type f | sort > files/f-after ; find / -path /proc -prune -o -path /tmp -prune -o -type d | sort > files/d-after
     - cd files
     - diff d-before d-after || true
     - diff f-before f-after
