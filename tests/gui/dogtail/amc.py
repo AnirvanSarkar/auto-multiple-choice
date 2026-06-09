@@ -117,6 +117,7 @@ class AMC:
 
     def scroll_and_click(self, context, value,
                          double=False, enter=False, hold_control=False):
+        print(f"Scroll to <{value}>")
         (base, scrollbar, nbparents) = context
         base.grab_focus()
         y = 0
@@ -136,7 +137,7 @@ class AMC:
             time.sleep(0.5)
             try:
                 if hold_control:
-                    dogtail.rawinput.hold_key('Control_L')
+                    dogtail.rawinput.holdKey('Control_L')
                     time.sleep(0.2)
                 if double:
                     x.doubleClick()
@@ -144,14 +145,15 @@ class AMC:
                     x.click()
                     if enter:
                         time.sleep(0.2)
-                        dogtail.rawinput.press_key('enter')
+                        dogtail.rawinput.pressKey('enter')
                 if hold_control:
                     time.sleep(0.2)
-                    dogtail.rawinput.release_key('Control_L')
+                    dogtail.rawinput.releaseKey('Control_L')
 
                 disapeared = len(base.findChildren(
                     dogtail.predicate.GenericPredicate(value))) == 0
-            except:
+            except Exception as e:
+                print(e)
                 ok = False
             if not (disapeared or x.selected):
                 ok = False
@@ -175,8 +177,9 @@ class AMC:
             print("Parents:", [str(x.parent) for x in found])
             try:
                 d = found[0].findAncestor(dogtail.predicate.GenericPredicate(
-                    roleName='dialog'), retry=False)
+                    roleName='dialog')) or found[0]
             except:
+                print("Parent dialog not found!")
                 d = found[0]
 
             return d
@@ -326,7 +329,7 @@ class AMC:
         if section is not None:
             endoc = dialog.child(section)
             action = endoc.actions['expand or contract']
-            endoc.do_action(action)
+            action.do()
         scrollbar = dialog.findChildren(
             dogtail.predicate.GenericPredicate(roleName='scroll bar'))[1]
         self.scroll_and_click((dialog, scrollbar, 0), template)
@@ -494,7 +497,8 @@ class AMC:
         print("Item:", i)
         cb = i.parent.parent
         print("Menu:", cb)
-        cb.combovalue = mode
+        if cb.combovalue != mode:
+            cb.combovalue = mode
         # pre-allocation
         if prealloc:
             prealloc = [a for a in choix.findChildren(
