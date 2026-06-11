@@ -1,0 +1,93 @@
+\documentclass[a4paper]{article}
+
+\usepackage[utf8x]{inputenc}    
+\usepackage[T1]{fontenc}
+
+\usepackage[francais,bloc,completemulti]{automultiplechoice}    
+\begin{document}
+
+\scoring{allowempty=2}
+\scoringDefaultM{haut=2}
+
+\exemplaire{10}{    
+
+%%% debut de l'en-tête des copies :    
+
+\noindent{\bf QCM  \hfill TEST}
+
+\vspace*{.5cm}
+\begin{minipage}{.4\linewidth}
+\centering\large\bf Test\\ Examen du 01/01/2008\end{minipage}
+\champnom{\fbox{    
+                \begin{minipage}{.5\linewidth}
+                  Nom et prénom :
+
+                  \vspace*{.5cm}\namefielddots   
+                  \vspace*{1mm}
+                \end{minipage}
+         }}
+
+       \begin{center}\em
+         Vous pouvez laisser deux questions sans réponse : elles ne
+         seront pas prises en compte dans la notation.
+       \end{center}
+\vspace{1ex}
+
+%%% fin de l'en-tête
+
+\begin{question}{hist:prez}    
+  Parmi les personnalités suivantes, laquelle a été présidente
+  de la république française~?
+  \begin{reponses}
+    \bonne{René Coty}
+    \mauvaise{Alain Prost}
+    \mauvaise{Marcel Proust}
+    \mauvaise{Claude Monet}
+  \end{reponses}
+\end{question}
+
+\begin{question}{hist:marignan}
+  En quelle année a eu lieu la bataille de Marignan ?
+  \begin{reponses}
+    \bonne{1515}
+    \mauvaise{1945}
+    \mauvaise{1789}
+    \mauvaise{1000}
+  \end{reponses}
+  
+\end{question}
+
+\begin{questionmult}{geo:pref}    
+  Parmi les villes suivantes, lesquelles sont des préfectures~?
+  \begin{reponses}
+    \bonne{Poitiers}
+    \mauvaise{Sainte-Menehould}
+    \bonne{Avignon}
+  \end{reponses}
+\end{questionmult}
+
+\begin{questionmult}{geo:europe}
+  Parmi les pays suivants, lesquels sont européens ?
+  \begin{reponses}
+    \bonne{France}
+    \bonne{Espagne}
+    \bonne{Allemagne}
+    \mauvaise{Chine}
+    \mauvaise{Vénézuéla}
+  \end{reponses}
+\end{questionmult}
+
+\begin{questionmult}{geo:amerique}
+  Parmi les pays suivants, lesquels sont sur le continent américain ?
+  \begin{reponses}
+    \bonne{Vénézuéla}
+    \bonne{Mexique}
+    \mauvaise{Chine}
+    \mauvaise{France}
+    \mauvaise{Australie}
+  \end{reponses}
+\end{questionmult}
+
+}   
+
+\end{document}

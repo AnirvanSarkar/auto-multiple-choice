@@ -244,7 +244,11 @@ for my $sc (@captured_studentcopy) {
         # $question is the question numerical ID, and
         # $q is the question scoring data (see AMC::DataModule::scoring)
 
-        debug "MARK: QUESTION $question TITLE " . $q->{title};
+        debug "----------------------------------------------";
+        debug "MARK: SHEET "
+          . studentids_string(@$sc)
+          . " QUESTION $question TITLE "
+          . $q->{title};
 
         # Uses the scoring engine to score the question...
         #

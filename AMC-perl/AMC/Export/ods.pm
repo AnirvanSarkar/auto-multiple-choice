@@ -1720,6 +1720,7 @@ sub export {
                                 if ( $r->{why} =~ /c/i ) {
                                     $doc->cellStyle( $feuille, $jj, $ii,
                                         'NoteC' );
+                                    $effective = 0;
                                 } elsif ( $r->{why} =~ /v/i ) {
                                     $doc->cellStyle( $feuille, $jj, $ii,
                                         'NoteV' );

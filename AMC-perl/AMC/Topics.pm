@@ -644,13 +644,14 @@ sub student_topic_calc {
     my @nums = ();
     my $agg  = $topic->{aggregate};
     my $all_empty = 1;
+
     for my $q ( @{ $topic->{questions_list} } ) {
         my $r =
             $self->{scoring}->question_result( $student, $copy, $q->{question} );
         my $indic = 0;
         $indic = $self->{scoring}->indicative( $student, $q->{question} )
             if($self->get_option('skip_indicatives'));
-        if ( defined( $r->{score} ) && ! $indic ) {
+        if ( defined( $r->{score} ) && ! $indic && $r->{why} ne 'C' ) {
             debug "Student ($student,$copy) topic $topic->{id} score ($r->{score},$r->{max}) for question $q->{title}";
             push @x, [ $r->{score}, $r->{max}, $r->{why} ];
             push @nums,
