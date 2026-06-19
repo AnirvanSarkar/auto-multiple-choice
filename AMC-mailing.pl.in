@@ -139,7 +139,7 @@ if ( -f $ids_file ) {
     open( IDS, $ids_file );
     while (<IDS>) {
         chomp;
-        debug "[$_]";
+        debug ":: <$_>";
         $ids{$_} = 1;
     }
     close(IDS);
@@ -251,8 +251,16 @@ my $failed_auth = 0;
 STUDENT: for my $i (@$r) {
     my ($s) = $students->data( $key, $i->{id}, test_numeric => 1 );
     my $dest = $s->{$email_column};
-    debug "Loop: ID $i->{id} DEST [$dest]";
-    if ( $ids_file && !$ids{ $i->{id} } ) {
+    my $sc_string = studentids_string( $i->{student}, $i->{copy} );
+    debug "Loop: ID $i->{id} SC $sc_string DEST [$dest]";
+    if (
+        $ids_file
+        && !(
+               $ids{ $i->{id} }
+            || $ids{ "copy($sc_string)" }
+        )
+      )
+    {
         debug "Skipped";
         next STUDENT;
     }

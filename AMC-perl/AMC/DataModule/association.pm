@@ -207,6 +207,18 @@ sub define_statements {
               . " FROM $at"
               . " ) WHERE real=?||''"
         },
+        realBacks =>
+          { sql => "SELECT s.student,s.copy,min(c.timestamp_auto) AS creation "
+              . " FROM ( SELECT CASE"
+              . " WHEN manual IS NOT NULL THEN manual"
+              . " ELSE auto END AS real, student, copy"
+              . " FROM $at"
+              . " WHERE real=?||''"
+              . " ) AS s"
+              . " LEFT JOIN capture.capture_page AS c "
+              . " ON s.student=c.student AND s.copy=c.copy "
+              . " GROUP BY s.student, s.copy "
+              . " ORDER BY creation " },
         realBackInt => {
                 sql => "SELECT student,copy FROM ( SELECT CASE"
               . " WHEN manual IS NOT NULL THEN manual"
@@ -385,6 +397,19 @@ sub real_back {
         @r = $self->sql_row( $self->statement('realBackInt'), $code );
     }
     return (@r);
+}
+
+# real_backs($code) returns a list of (student,copy) list refs
+# corresponding to all the answer sheets that are currently associated
+# with the student ID $code.
+
+sub real_backs {
+    my ( $self, $code ) = @_;
+    $self->{data}->require_module('capture');
+    return @{
+        $self->dbh->selectall_arrayref( $self->statement('realBacks'),
+            {}, $code )
+    };
 }
 
 # state($student,$copy) returns:

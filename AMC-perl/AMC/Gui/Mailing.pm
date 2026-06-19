@@ -226,26 +226,49 @@ sub dialog {
 
     for my $i (@{$self->{email_r}}) {
         my ($s) = $self->{students_list}
-          ->data( $self->{email_key}, $i->{id}, test_numeric => 1 );
-        my @sc = $self->{association}->real_back( $i->{id} );
-        $emails_store->set(
-            $emails_store->append,
-            EMAILS_ID,
-            $i->{id},
-            EMAILS_EMAIL,
-            '',
-            EMAILS_NAME,
-            $s->{_ID_},
-            EMAILS_SC,
-            ( defined( $sc[0] ) ? pageids_string(@sc) : "[" . $i->{id} . "]" ),
-            EMAILS_STATUS,
-            (
-                $i->{mail_status} == REPORT_MAIL_OK ? __("done")
-                : $i->{mail_status} == REPORT_MAIL_FAILED
-                ? __("failed")
-                : ""
-            ),
-        );
+        ->data( $self->{email_key}, $i->{id}, test_numeric => 1 );
+
+        my $current_id = '';
+        my $v = 1;
+
+        my @sc_list;
+        if ( $self->{kind} == REPORT_ANNOTATED_PDF ) {
+            @sc_list = $self->{association}->real_backs( $i->{id} );
+        } else {
+            @sc_list = [ ( $i->{student}, $i->{copy} ) ];
+        }
+        for my $sc ( @sc_list ) {
+            if($current_id && $current_id eq $i->{id}) {
+                $v += 1;
+            } else {
+                $current_id = $i->{id};
+                $v = 1;
+            }
+            my $name = $s->{_ID_};
+            if($v > 1) {
+                $name .= " (v$v)";
+            }
+            $emails_store->set(
+                $emails_store->append,
+                EMAILS_ID,
+                $i->{id},
+                EMAILS_EMAIL,
+                '',
+                EMAILS_NAME,
+                $name,
+                EMAILS_SC,
+                (
+                    defined( $sc->[0] ) ? studentids_string(@$sc)
+                    : "[" . $i->{id} . "]"
+                ),
+                EMAILS_STATUS,
+                (
+                      $i->{mail_status} == REPORT_MAIL_OK     ? __("done")
+                    : $i->{mail_status} == REPORT_MAIL_FAILED ? __("failed")
+                    :                                           ""
+                ),
+            );
+        }
     }
     $self->{emails_failed} = [
         map    { $_->{id} }
@@ -287,7 +310,11 @@ sub dialog {
         @selected = @{ $selected[0] };
         for my $i (@selected) {
             my $iter = $emails_store->get_iter($i);
-            push @ids, $emails_store->get( $iter, EMAILS_ID );
+            if ( $self->{kind} == REPORT_ANNOTATED_PDF ) {
+                push @ids, "copy(" . $emails_store->get( $iter, EMAILS_SC ) . ")";
+            } else {
+                push @ids, $emails_store->get( $iter, EMAILS_ID );
+            }
         }
 
         # get attachments filenames
