@@ -1,6 +1,21 @@
 #! /bin/bash
 
+export EXT_HOME=$HOME
+export HOME=/tmp/gui-tests
+
+test -d $HOME && rm -rf $HOME
+mkdir $HOME
+cp -r home/.* home/* $HOME
+echo "file://$HOME/AMC-tmp AMC-tmp" > $HOME/.config/gtk-3.0/bookmarks
+
 for t in test-*.py
 do
-    ./$t
+    echo
+    echo "***************************************** $t"
+    echo
+    if ! ./$t
+    then
+        echo "*** failed : $t"
+        exit 1
+    fi
 done

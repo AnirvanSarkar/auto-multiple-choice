@@ -8,7 +8,7 @@ import os
 a = amc.AMC()
 a.launch()
 
-a.open_project('a ccentué', 'test-template')
+a.open_project('a ccentué', 'test-template-1')
 a.build_documents()
 a.build_other_document(2)
 a.scan_from_individual_solution(dest="template-3.pdf")

@@ -17,7 +17,7 @@ class AMC:
     def __init__(self):
         self.gui = None
         self.tmp_dir = os.getenv("HOME") + '/AMC-tmp'
-        self.cups_pdf_dir = os.getenv("HOME") + '/PDF'
+        self.cups_pdf_dir = os.getenv("EXT_HOME", os.getenv("HOME")) + '/PDF'
         self.tmp_bookmark = 'AMC-tmp'
         self.project_name = 'test'
         self.debug = (os.getenv("AMC_DEBUG") == '1')
@@ -63,6 +63,7 @@ class AMC:
     def copy_in_src_dir(self, path):
         self.check_src_dir()
         base = os.path.basename(path)
+        print(f"COPY {path} -> {self.src_dir()}")
         copyfile(path, self.src_dir() + '/' + base)
         return base
 
@@ -117,12 +118,11 @@ class AMC:
 
     def scroll_and_click(self, context, value,
                          double=False, enter=False, hold_control=False):
-        print(f"Scroll to <{value}>")
+        print(f"> Scroll to <{value}>")
         (base, scrollbar, nbparents) = context
         base.grab_focus()
         y = 0
         ok = False
-        print("Click on '%s'" % value)
         x = base.child(value, retry=False)
         disapeared = False
         if x is None:
@@ -150,6 +150,7 @@ class AMC:
                     time.sleep(0.2)
                     dogtail.rawinput.releaseKey('Control_L')
 
+                print(f"Clicked on <{value}>")
                 disapeared = len(base.findChildren(
                     dogtail.predicate.GenericPredicate(value))) == 0
             except Exception as e:
