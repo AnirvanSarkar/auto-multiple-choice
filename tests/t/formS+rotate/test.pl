@@ -26,8 +26,8 @@ AMC::Test->new(
     grain        => 0.1,
     check_marks  => { 4 => 13.3 },
     verdict      => 'TOTAL : %S/%M => %s/%m',
-    model        => '(N).PDF',
+    model        => '(N).pdf',
     annote       => [ 3, 4 ],
-    annote_files => [ '0003.PDF', '0004.PDF' ],
+    annote_files => [ '0003.pdf', '0004.pdf' ],
 )->default_process;
 

@@ -560,7 +560,7 @@ sub define_statements {
         marks      => {
             sql => "SELECT s.*, min(timestamp_auto) AS creation "
                 . " FROM " . $self->table("mark") . " AS s "
-                . " LEFT JOIN " . $self->table("page", "capture") . " AS c "
+                . " LEFT JOIN capture.capture_page AS c "
                 . " ON s.student=c.student AND s.copy=c.copy"
                 . " GROUP BY s.student, s.copy ORDER BY s.student, s.copy, creation"
         },

@@ -115,6 +115,7 @@ sub load {
     $self->{_data}    = AMC::Data->new( $self->{'fich.datadir'} );
     $self->{_scoring} = $self->{_data}->module('scoring');
     $self->{_layout}  = $self->{_data}->module('layout');
+    $self->{_capture} = $self->{_data}->module('capture');
     $self->{_assoc}   = $self->{_data}->module('association');
 
     if ( $self->{'fich.noms'} && !$self->{noms} ) {

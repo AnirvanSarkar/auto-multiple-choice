@@ -27,6 +27,7 @@ use File::Copy;
 use Unicode::Normalize;
 use File::Temp qw/ tempfile /;
 use Text::CSV;
+use Data::Dumper;
 
 use AMC::Path;
 use AMC::Basic;
@@ -139,11 +140,12 @@ sub new {
     $self->{filename_model} = '(N)-(ID)'
       if ( $self->{filename_model} eq '' );
 
-    # adds pdf extension if not already there
-    if ( $self->{filename_model} !~ /\.pdf$/i ) {
-        debug "Adding pdf extension to $self->{filename_model}";
-        $self->{filename_model} .= '.pdf';
+    # adds pdf extension, and version if not already there
+    $self->{filename_model} =~ s/\.pdf$//i;
+    if ( $self->{filename_model} !~ /\(version(suffix)?\)/ ) {
+        $self->{filename_model} .= '(versionsuffix)';
     }
+    $self->{filename_model} .= '.pdf';
 
     # which pdf file will be used as a background when scans are not
     # available?
@@ -247,7 +249,6 @@ sub student_uptodate {
 sub pdf_output_filename {
     my ( $self, $student ) = @_;
 
-    $self->needs_data;
     $self->needs_names;
 
     my $f = $self->{filename_model};
@@ -256,10 +257,10 @@ sub pdf_output_filename {
 
     # computes student/copy four digits ID and substitutes (N) with it
     my $ex;
-    if ( $student->[1] ) {
-        $ex = sprintf( "%04d:%04d", @$student );
+    if ( $student->{copy} ) {
+        $ex = sprintf( "%04d:%04d", $student->{student}, $student->{copy} );
     } else {
-        $ex = sprintf( "%04d", $student->[0] );
+        $ex = sprintf( "%04d", $student->{student} );
     }
     $f =~ s/\(N\)/$ex/gi;
 
@@ -268,19 +269,23 @@ sub pdf_output_filename {
     # Substitute (aID) with anonymous ID
 
     if ( $self->{anonymous} && $f =~ /\(aID\)/ ) {
-        $self->{association}->begin_transaction('anon');
-        my $aid = $self->{association}
-          ->anonymized( $student->[0], $student->[1], $self->{anonymous} );
+        my $aid = $student->{aID};
         $f =~ s/\(aID\)/$aid/g;
-        $self->{association}->end_transaction('anon');
     }
+
+    # Substitute version number if greater than 1
+    my $version = $student->{'copy.version'} || '';
+    my $versionsuffix = '';
+    if ( $version > 1 ) {
+        $versionsuffix = '-v' . $version;
+    }
+    $f =~ s/\(version\)/$version/g;
+    $f =~ s/\(versionsuffix\)/$versionsuffix/g;
 
     # get student data from the students list file, and substitutes
     # into filename
     if ( $self->{names} ) {
-        $self->{data}->begin_read_transaction('rAGN');
-        my $i = $self->{association}->get_real(@$student);
-        $self->{data}->end_transaction('rAGN');
+        my $i = $student->{'student.key'};
 
         my $name = 'XXX';
         my $n;
@@ -291,7 +296,7 @@ sub pdf_output_filename {
             ($n) = $self->{names}
               ->data( $self->{association_key}, $i, test_numeric => 1 );
             if ($n) {
-                debug "Found";
+                debug "Not found";
                 $f = $self->{names}->substitute( $n, $f );
             }
         } else {
@@ -324,16 +329,17 @@ sub pdf_output_filename {
 
     my $uptodate_filename = '';
     if ( $self->{changes_only} ) {
-        $uptodate_filename = $self->student_uptodate($student);
+        $uptodate_filename =
+          $self->student_uptodate( [ $student->{student}, $student->{copy} ] );
     }
 
     # delete the entry from the database, and build a filename that is
     # not already registered for another student (the same or similar to
     # $f).
 
-    $self->{report}->delete_student_report( $self->{type}, @$student );
+    $self->{report}->delete_student_report( $self->{type}, $student->{student}, $student->{copy} );
     $f = $self->{report}->free_student_report( $self->{type}, $f );
-    $self->{report}->set_student_report( $self->{type}, @$student, $f, 'now' );
+    $self->{report}->set_student_report( $self->{type}, $student->{student}, $student->{copy}, $f, 'now' );
 
     $self->{data}->end_transaction('rSST');
 
@@ -482,18 +488,16 @@ sub compute_sorted_students_list {
 # sort the students so that they are ordered as in the sorted_students
 # list
 
-sub sort_students {
+sub select_students {
     my ($self) = @_;
 
-    $self->compute_sorted_students_list();
     my %include =
       map { studentids_string(@$_) => 1 } ( @{ $self->{students} } );
-    $self->{students} = [
-        map { [ $_->{student}, $_->{copy} ] }
-          grep { $include{ studentids_string( $_->{student}, $_->{copy} ) } }
-          ( @{ $self->{sorted_students}->{marks} } )
-    ];
+    $self->{students_full} =
+      [ grep { $include{ studentids_string( $_->{student}, $_->{copy} ) } }
+          ( @{ $self->{sorted_students}->{marks} } ) ];
 
+    return 1 + $#{ $self->{students_full} };
 }
 
 # get the students to process from a file and return the number of
@@ -547,12 +551,12 @@ sub get_students {
     my $n = $self->get_students_from_file
       || $self->get_students_from_data;
 
-    # sort this list if we are going to make an unique annotated
-    # file with all the students' copies (and if a sort key is given)
-    if ( $n > 1 && $self->{single_output} && $self->{sort} ) {
-        $self->sort_students();
-    }
+    # sort students list and compute version numbers
+    $self->compute_sorted_students_list();
 
+    # select students from this list
+    $n = $self->select_students();
+    
     debug "Number of students to process: $n";
 
     return ($n);
@@ -674,7 +678,7 @@ sub insert_pdf_page {
 sub student_pages {
     my ( $self, $student ) = @_;
     return (
-        $self->{layout}->pages_info_for_student( $student->[0], enter_tag => 1 )
+        $self->{layout}->pages_info_for_student( $student, enter_tag => 1 )
     );
 }
 
@@ -1216,7 +1220,7 @@ sub student_draw_page {
 sub process_student {
     my ( $self, $student ) = @_;
 
-    debug "Processing student $student->[0]:$student->[1]";
+    debug "Processing student " . Dumper($student);
 
     # Computes the filename to use, and check that there is no
     # up-to-date version of the annotated answer sheet (if so, simply
@@ -1255,17 +1259,17 @@ sub process_student {
     $self->{data}->begin_read_transaction('aOST');
 
     $self->{header_drawn} = 0;
-    $self->{header_zone} = $self->{layout}->has_zone('report', $student->[0]);
+    $self->{header_zone} = $self->{layout}->has_zone('report', $student->{student});
     
-    for my $page ( $self->student_pages($student) ) {
-        $self->student_draw_page( $student, $page );
+    for my $page ( $self->student_pages($student->{student}) ) {
+        $self->student_draw_page( [$student->{student}, $student->{copy}], $page );
     }
 
     if ( $self->{add_corrected} ) {
         if ( -f $self->{pdf_corrected} ) {
             my @p = sort { $a <=> $b }
-              ( $self->{layout}->student_correctedpages( $student->[0] ) );
-            debug "ADD_CORRECTED[$student->[0]] from $self->{pdf_corrected}: pages "
+              ( $self->{layout}->student_correctedpages( $student->{student} ) );
+            debug "ADD_CORRECTED[$student->{student}] from $self->{pdf_corrected}: pages "
               . join( ", ", @p );
             for my $page (@p) {
                 $self->insert_pdf_page( $self->{pdf_corrected}, $page );
@@ -1299,13 +1303,12 @@ sub go {
 
             $self->{qnobox} = $self->{layout}->questions_with_no_box();
 
-            $self->{aIDs} = [
-                sort { $a cmp $b }
-                  map {
-                    $self->{association}
-                      ->anonymized( $_->[0], $_->[1], $self->{anonymous} )
-                  } @{ $self->{students} }
-            ];
+            $self->{aIDs} = [];
+            for my $x (@{$self->{students_full}}) {
+                $x->{aID} = $self->{association}
+                    ->anonymized( $x->{student}, $x->{copy}, $self->{anonymous} );
+                push @{$self->{aIDs}}, $x->{aID};
+            }
 
             $self->{layout}->end_transaction('aIDQ');
         }
@@ -1319,7 +1322,7 @@ sub go {
 
         # Loop over students...
 
-        for my $student ( @{ $self->{students} } ) {
+        for my $student ( @{ $self->{students_full} } ) {
             $self->process_student($student);
             $self->{avance}->progres( 1 / $n ) if ( $self->{avance} );
         }
@@ -1335,7 +1338,7 @@ sub go {
                   or die "Unable to write to $self->{pdf_dir}/external.csv: $!";
                 $csv->say( $fh,
                     [ "aID", map { $_->{name} } @{ $self->{qnobox} } ] );
-                for my $id ( @{ $self->{aIDs} } ) {
+                for my $id ( sort { $a cmp $b } @{ $self->{aIDs} } ) {
                     $csv->say( $fh,
                         [ $id, @empty ] );
                 }
