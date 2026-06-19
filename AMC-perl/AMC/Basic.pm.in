@@ -65,7 +65,7 @@ BEGIN {
           &blob_to_file &amc_component &annotate_source_change &join_nonempty &printable
           &string_to_usascii &string_to_filename &show_utf8 &path_to_filename &free_disk_mo
           &dir_contents_u &clean_gtk_filenames &glib_filename &n_fich &unzip_to_temp
-          &split_project_dir &GetProjectOptions &get_extension);
+          &split_project_dir &GetProjectOptions &get_extension &amc_version);
     %EXPORT_TAGS = ();    # eg: TAG => [ qw!name1 name2! ],
 
     # your exported package globals go here,
@@ -439,6 +439,10 @@ sub model_id_to_iter {
 my $amc_debug          = '';
 my $amc_debug_fh       = '';
 my $amc_debug_filename = '';
+
+sub amc_version {
+    return "@/PACKAGE_V_DEB/@ (@/PACKAGE_V_VC/@)";
+}
 
 sub debug_general_info {
     print $amc_debug_fh

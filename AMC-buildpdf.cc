@@ -84,6 +84,12 @@ int main(int argc, char** argv )
       i = 0;
       if(strncmp(command, "output ", 7) == 0) {
 	processing_error = PDF.start_output(command + 7);
+      } else if(strncmp(command, "title ", 6) == 0) {
+        PDF.set_metadata(CAIRO_PDF_METADATA_TITLE, command + 6);
+      } else if(strncmp(command, "subject ", 8) == 0) {
+        PDF.set_metadata(CAIRO_PDF_METADATA_SUBJECT, command + 8);
+      } else if(strncmp(command, "creator ", 8) == 0) {
+        PDF.set_metadata(CAIRO_PDF_METADATA_CREATOR, command + 8);
       } else if(strcmp(command, "debug") == 0) {
 	PDF.set_debug(1);
       } else if(strncmp(command, "page png ", 9) == 0) {

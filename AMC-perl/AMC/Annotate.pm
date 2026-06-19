@@ -53,6 +53,7 @@ sub new {
         data_dir               => '',
         project_dir            => '',
         projects_dir           => '',
+        project_name           => '',
         pdf_dir                => '',
         single_output          => '',
         filename_model         => '(N)-(ID)',
@@ -1252,6 +1253,21 @@ sub process_student {
         }
         
         $self->command("output $path");
+        if(!$student->{aID}) {
+            my $title = '';
+            if($self->{project_name}) {
+                $title .= $self->{project_name} . " - ";
+            }
+            $title .= __("Annotated paper");
+            my $desc = "[" . studentids_string( $student->{student}, $student->{copy} ) . "]";
+            $desc .= " " . $student->{'student.name'};
+            if($student->{'copy.version'} > 1) {
+                $desc .= " v" . $student->{'copy.version'};
+            }
+            $self->command("title $title");
+            $self->command("subject $desc");
+            $self->command("creator AMC " . amc_version() . " (https://www.auto-multiple-choice.net)");
+        }
     }
 
     # Go through all the pages for the student.

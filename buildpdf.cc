@@ -218,6 +218,12 @@ public:
 
   int start_output(char* output_filename);
 
+  /* set PDF metadata */
+
+  void set_metadata(cairo_pdf_metadata_t type, const char* content) {
+    if(surface != NULL) cairo_pdf_surface_set_metadata(surface, type, content);
+  }
+
   /* close_output finishes with building the PDF, and closes the
      file. */
 
