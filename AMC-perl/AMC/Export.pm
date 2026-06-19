@@ -35,11 +35,11 @@ our @ISA = ("AMC::Messages");
 use_gettext;
 
 my %sorting = (
-    l => ['n:student.line', 'n:student', 'n:copy'],
-    'm' => [ 'n:mark', 's:student.name', 'n:student.line', 'n:student', 'n:copy' ],
-    'r' => [ 'nr:mark', 's:student.name', 'n:student.line', 'n:student', 'n:copy' ],
-    i => [ 'n:student', 'n:copy', 'n:student.line' ],
-    n => [ 's:student.name', 'n:student.line', 'n:student', 'n:copy' ],
+    l => ['n:student.line', 'n:copy.version', 'n:student', 'n:copy'],
+    'm' => [ 'n:mark', 's:student.name', 'n:copy.version', 'n:student.line', 'n:student', 'n:copy' ],
+    'r' => [ 'nr:mark', 's:student.name', 'n:copy.version', 'n:student.line', 'n:student', 'n:copy' ],
+    i => [ 'n:student', 'n:copy', 'n:student.line', 'n:copy.version' ],
+    n => [ 's:student.name', 'n:student.line', 'n:copy.version', 'n:student', 'n:copy' ],
 );
 
 sub new {
@@ -61,8 +61,10 @@ sub new {
 
         'out.rtl' => '',
 
-        'sort.keys' => [ 's:student.name', 'n:student.line', 'n:student', 'n:copy' ],
+        'sort.keys' => [ 's:student.name', 'n:student.line', 'n:copy.version', 'n:student', 'n:copy' ],
         'sort.cols' => 'smart',
+
+        'multiple.versions' => 0,
 
         marks => [],
 
@@ -267,7 +269,10 @@ sub pre_process {
         # Association key for this sheet
         $m->{'student.key'} =
           $self->{_assoc}->get_real( $m->{student}, $m->{copy} );
-        $keys{ $m->{'student.key'} } = 1 if ( $m->{'student.key'} );
+        if ( $m->{'student.key'} ) {
+            $self->{'multiple.copies'} = 1 if ( $keys{ $m->{'student.key'} } );
+            $keys{ $m->{'student.key'} } = 1;
+        }
 
         # find the corresponding name
         my $n;
@@ -294,6 +299,29 @@ sub pre_process {
             }
         }
         push @marks, $m;
+    }
+
+    # If multiple copies are detected for some single students,
+    # compute the version
+
+    if($self->{'multiple.copies'}) {
+        debug "Multiple copies detected!";
+        @marks = sort {
+            $a->{'student.key'} cmp $b->{'student.key'} ||
+                $a->{creation} <=> $b->{creation}
+            } @marks;
+        my $v = 1;
+        my $current_key = '';
+        for my $x (@marks) {
+            if($current_key && $x->{'student.key'}
+               && $current_key eq $x->{'student.key'}) {
+                $v += 1;
+            } else {
+                $current_key = $x->{'student.key'};
+                $v = 1;
+            }
+            $x->{'copy.version'} = $v;
+        }
     }
 
     # Now, add students with no mark (if requested)

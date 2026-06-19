@@ -219,6 +219,7 @@ my %style_col = (
       NOM General
       NOTE NoteF
       student.copy NumCopie
+      copy.version NumCopie
       TOTAL NoteQ
       GS NoteGS
       GSp NoteGSp
@@ -1274,6 +1275,7 @@ sub export {
     $styles->pageLayout("Default", "DefaultPage");
 
     my @student_columns = split( /,+/, $self->{'out.columns'} );
+    push @student_columns, 'copy.version' if($self->{'multiple.copies'});
 
     my @codes;
     my @questions;
@@ -1371,6 +1373,7 @@ sub export {
         $name = "A:" . encode( 'utf-8', $lk )   if ( $name eq 'student.key' );
         $name = translate_column_title('nom')   if ( $name eq 'student.name' );
         $name = translate_column_title('copie') if ( $name eq 'student.copy' );
+        $name = translate_column_title('version') if ( $name eq 'copy.version' );
 
         $col_content{$_} = [$name];
         $doc->cellValue( $feuille, $y0, $ii, encode( 'utf-8', $name ) );
@@ -1536,6 +1539,8 @@ sub export {
               if ( $name eq 'student.name' );
             $name = translate_column_title('copie')
               if ( $name eq 'student.copy' );
+            $name = translate_column_title('version')
+              if ( $name eq 'copy.version' );
 
             $col_content{$_} = [$name];
             $doc->cellValue( $feuille, $jj, $ii, encode( 'utf-8', $name ) );

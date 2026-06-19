@@ -427,8 +427,11 @@ sub define_statements {
         },
         NEWPageManual => {
                 sql => "INSERT INTO $t_page"
-              . " (student,page,copy,timestamp_manual)"
-              . " VALUES (?,?,?,?)"
+              . " (student,page,copy,timestamp_auto,timestamp_manual)"
+              . " VALUES (?,?,?,?,?)"
+        },
+        CopyCreation => {
+            sql => "SELECT min(timestamp_auto) FROM $t_page WHERE student=? AND copy=?"
         },
         SetPageAuto => {
                 sql => "UPDATE $t_page"
@@ -939,8 +942,18 @@ sub set_page_manual {
           ->execute( $timestamp, $student, $page, $copy );
     } else {
         $self->statement('NEWPageManual')
-          ->execute( $student, $page, $copy, $timestamp );
+          ->execute( $student, $page, $copy, $timestamp, $timestamp );
     }
+}
+
+# get the first time some page is integrated to the capture database
+# from the copy identified by student and copy values.
+
+sub copy_creation_timestamp {
+    my ( $self, $student, $copy ) = @_;
+    $copy = 0 if ( !$copy );
+    return $self->sql_single( $self->statement('CopyCreation'), $student,
+        $copy );
 }
 
 # get_zoneid($student,$page,$copy,$type,$id_a,$id_b,$create) gets the

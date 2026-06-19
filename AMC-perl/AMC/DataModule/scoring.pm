@@ -557,7 +557,13 @@ sub define_statements {
               . $self->table("mark")
               . " WHERE student=? AND copy=?"
         },
-        marks      => { sql => "SELECT * FROM " . $self->table("mark") },
+        marks      => {
+            sql => "SELECT s.*, min(timestamp_auto) AS creation "
+                . " FROM " . $self->table("mark") . " AS s "
+                . " LEFT JOIN " . $self->table("page", "capture") . " AS c "
+                . " ON s.student=c.student AND s.copy=c.copy"
+                . " GROUP BY s.student, s.copy ORDER BY s.student, s.copy, creation"
+        },
         marksCount => { sql => "SELECT COUNT(*) FROM " . $self->table("mark") },
         codes      => {
                 sql => "SELECT code FROM "
@@ -1269,16 +1275,16 @@ sub codes {
 }
 
 # marks returns a pointer to an array of pointers (one for each
-# student) to hashes giving all information from the mark table.
+# student) to hashes giving all information from the mark table,
+# together with the "creation" timestamp.
 
 sub marks {
     my ($self) = @_;
-    return (
-        @{
-            $self->dbh->selectall_arrayref( $self->statement('marks'),
-                { Slice => {} } )
-        }
-    );
+    $self->{data}->require_module('capture');
+    return @{
+        $self->dbh->selectall_arrayref( $self->statement('marks'),
+            { Slice => {} } )
+    };
 }
 
 # marks_count returns the nmber of marks computed.
