@@ -518,6 +518,11 @@ sub define_statements {
               . " WHERE timestamp_auto>0 OR timestamp_manual>0"
               . " GROUP BY student,copy ORDER BY student,copy"
         },
+        studentCopiesDate => {
+                sql => "SELECT student,copy,min(timestamp_auto) as creation FROM $t_page"
+              . " WHERE timestamp_auto>0 OR timestamp_manual>0"
+              . " GROUP BY student,copy ORDER BY student,copy"
+        },
         maxCopy    => { sql => "SELECT MAX(copy) FROM $t_page" },
         maxAnswer  => { sql => "SELECT MAX(id_b) FROM $t_zone WHERE type=?" },
         pageCopies => {
@@ -1094,10 +1099,13 @@ sub students {
 # capture is declared.
 
 sub student_copies {
-    my ($self) = @_;
+    my ( $self, $modif ) = @_;
+    $modif = '' if ( !$modif );
     return (
         @{
-            $self->dbh->selectall_arrayref( $self->statement('studentCopies') )
+            $self->dbh->selectall_arrayref(
+                $self->statement( 'studentCopies' . $modif )
+            )
         }
     );
 }

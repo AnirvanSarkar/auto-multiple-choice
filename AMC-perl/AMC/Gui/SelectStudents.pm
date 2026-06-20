@@ -26,6 +26,7 @@ package AMC::Gui::SelectStudents;
 use parent 'AMC::Gui';
 
 use AMC::Basic;
+use POSIX qw/strftime/;
 
 sub new {
     my ( $class, %oo ) = @_;
@@ -44,6 +45,11 @@ sub new {
     );
 
     return ( $self->dialog() );
+}
+
+sub show_date {
+    my ($self, $timestamp) = @_;
+    return strftime( "%d/%m %H:%M", localtime($timestamp) )
 }
 
 sub dialog {
@@ -73,7 +79,7 @@ sub dialog {
 
     my $students_store = Gtk3::ListStore->new(
         'Glib::String', 'Glib::String',  'Glib::String', 'Glib::String',
-        'Glib::String', 'Glib::Boolean', 'Glib::Boolean'
+        'Glib::String', 'Glib::Boolean', 'Glib::Boolean', 'Glib::String', 'Glib::String'
     );
 
     my $filtered = Gtk3::TreeModelFilter->new($students_store);
@@ -82,6 +88,7 @@ sub dialog {
 
     $filtered_sorted->set_sort_func( 0, \&sort_num,    0 );
     $filtered_sorted->set_sort_func( 1, \&sort_string, 1 );
+    $filtered_sorted->set_sort_func( 7, \&sort_num,    7 );
 
     $self->{students_list_store}           = $students_store;
     $self->{students_list_filtered}        = $filtered;
@@ -113,24 +120,36 @@ sub dialog {
     $column->set_sort_column_id(1);
     $self->get_ui('students_select_list')->append_column($column);
 
+    $column = Gtk3::TreeViewColumn->new_with_attributes(
+        __ "date",
+        $renderer,
+        text => 8
+    );
+    $column->set_sort_column_id(7);
+    $self->get_ui('students_select_list')->append_column($column);
+
     $self->{capture}->begin_read_transaction('gSLi');
     my $key            = $self->{association}->variable('key_in_list');
     my @selected_iters = ();
     my $i              = 0;
-    for my $sc ( $self->{capture}->student_copies ) {
-        my $id = $self->{association}->get_real(@$sc);
+    for my $sc ( $self->{capture}->student_copies('Date') ) {
+        my @student_copy = ( $sc->[0], $sc->[1] );
+        my $creation_date = $sc->[2];
+        my $id = $self->{association}->get_real(@student_copy);
         my ($name) =
           $self->{students_list}->data( $key, $id, test_numeric => 1 );
         my $iter = $students_store->insert_with_values(
             $i++,
-            0 => studentids_string(@$sc),
+            0 => studentids_string(@student_copy),
             1 => $name->{_ID_},
             2 => $sc->[0],
             3 => $sc->[1],
             5 => 1,
             4 => ( $lk ? $name->{$lk} : '' ),
+            7 => $creation_date,
+            8 => $self->show_date($creation_date),
         );
-        push @selected_iters, $iter if ( $ids{ studentids_string(@$sc) } );
+        push @selected_iters, $iter if ( $ids{ studentids_string(@student_copy) } );
     }
     $self->{capture}->end_transaction('gSLi');
 
