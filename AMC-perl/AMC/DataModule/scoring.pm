@@ -558,7 +558,7 @@ sub define_statements {
               . " WHERE student=? AND copy=?"
         },
         marks      => {
-            sql => "SELECT s.*, min(timestamp_auto) AS creation "
+            sql => "SELECT s.*, min(created_at) AS creation "
                 . " FROM " . $self->table("mark") . " AS s "
                 . " LEFT JOIN capture.capture_page AS c "
                 . " ON s.student=c.student AND s.copy=c.copy"

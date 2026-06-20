@@ -53,6 +53,9 @@ package AMC::DataModule::capture;
 #   differentiate the completed answer sheets coming from the
 #   photocopied answer sheets from the same question paper.
 #
+# * created_at is the timestamp corresponding to the first data
+#   capture for this page
+#
 # * timestamp_auto is the time when the scan processing was done
 #   (using time function: seconds from Jan 1 1970), or -1 if there is
 #   no automatic data capture for this page.
@@ -176,7 +179,7 @@ our @ISA = ("AMC::DataModule");
 use_gettext();
 
 sub version_current {
-    return (5);
+    return (6);
 }
 
 sub version_upgrade {
@@ -189,11 +192,11 @@ sub version_upgrade {
         debug "Creating capture tables...";
         $self->sql_do( "CREATE TABLE IF NOT EXISTS "
               . $self->table("page")
-              . " (src TEXT, student INTEGER, page INTEGER, copy INTEGER DEFAULT 0, timestamp_auto INTEGER DEFAULT 0, timestamp_manual INTEGER DEFAULT 0, a REAL, b REAL, c REAL, d REAL, e REAL, f REAL, mse REAL, layout_image TEXT, annotated TEXT, timestamp_annotate INTEGER, PRIMARY KEY (student,page,copy))"
+              . " (src TEXT, student INTEGER, page INTEGER, copy INTEGER DEFAULT 0, timestamp_auto INTEGER DEFAULT 0, timestamp_manual INTEGER DEFAULT 0, a REAL, b REAL, c REAL, d REAL, e REAL, f REAL, mse REAL, layout_image TEXT, annotated TEXT, timestamp_annotate INTEGER, overwritten INTEGER DEFAULT 0, created_at INTEGER NOT NULL DEFAULT (unixepoch(current_timestamp)), PRIMARY KEY (student,page,copy))"
         );
         $self->sql_do( "CREATE TABLE IF NOT EXISTS "
               . $self->table("zone")
-              . " (zoneid INTEGER PRIMARY KEY, student INTEGER, page INTEGER, copy INTEGER, type INTEGER, id_a INTEGER, id_b INTEGER, total INTEGER DEFAULT -1, black INTEGER DEFAULT -1, manual REAL DEFAULT -1, image TEXT)"
+              . " (zoneid INTEGER PRIMARY KEY, student INTEGER, page INTEGER, copy INTEGER, type INTEGER, id_a INTEGER, id_b INTEGER, total INTEGER DEFAULT -1, black INTEGER DEFAULT -1, manual REAL DEFAULT -1, image TEXT, imagedata BLOB)"
         );
         $self->sql_do( "CREATE TABLE IF NOT EXISTS "
               . $self->table("position")
@@ -204,7 +207,16 @@ sub version_upgrade {
               . " (filename TEXT UNIQUE, timestamp INTEGER)" );
         $self->populate_from_xml;
 
-        return (1);
+        $self->sql_do( "CREATE UNIQUE INDEX IF NOT EXISTS "
+              . $self->index("index_zone") . " ON "
+              . $self->table( "zone", "self" )
+              . " (student,page,copy,type,id_a,id_b)" );
+        $self->sql_do( "CREATE INDEX IF NOT EXISTS "
+              . $self->index("index_zone_nopage") . " ON "
+              . $self->table( "zone", "self" )
+              . " (student,copy,type,id_a,id_b)" );
+
+        return (6);
     } elsif ( $old_version == 1 ) {
 
         # Includes zoom files in the database
@@ -265,6 +277,30 @@ sub version_upgrade {
               . $self->table("page")
               . " ADD COLUMN overwritten INTEGER DEFAULT 0" );
         return (5);
+    } elsif( $old_version == 5 ) {
+        $self->sql_do( "ALTER TABLE "
+              . $self->table("page")
+                       . " RENAME TO capture_pageold" );
+        $self->sql_do( "CREATE TABLE IF NOT EXISTS "
+              . $self->table("page")
+              . " (src TEXT, student INTEGER, page INTEGER, copy INTEGER DEFAULT 0, timestamp_auto INTEGER DEFAULT 0, timestamp_manual INTEGER DEFAULT 0, a REAL, b REAL, c REAL, d REAL, e REAL, f REAL, mse REAL, layout_image TEXT, annotated TEXT, timestamp_annotate INTEGER, overwritten INTEGER DEFAULT 0, created_at INTEGER NOT NULL DEFAULT (unixepoch(current_timestamp)), PRIMARY KEY (student,page,copy))"
+        );
+        my $cols =
+"src,student,page,copy,timestamp_auto,timestamp_manual,a,b,c,d,e,f,mse,layout_image,annotated,timestamp_annotate,overwritten";
+        $self->sql_do( " INSERT INTO "
+              . $self->table("page")
+              . " ($cols) SELECT $cols FROM "
+              . $self->table("pageold") );
+        $self->sql_do("DROP TABLE " . $self->table("pageold"));
+        $self->sql_do( "UPDATE "
+              . $self->table("page")
+              . " SET created_at=timestamp_manual WHERE timestamp_manual>0"
+        );
+        $self->sql_do( "UPDATE "
+              . $self->table("page")
+              . " SET created_at=timestamp_auto WHERE timestamp_auto>0 AND timestamp_auto<created_at"
+        );
+        return (6);
     }
     return ('');
 }
@@ -427,11 +463,11 @@ sub define_statements {
         },
         NEWPageManual => {
                 sql => "INSERT INTO $t_page"
-              . " (student,page,copy,timestamp_auto,timestamp_manual)"
-              . " VALUES (?,?,?,?,?)"
+              . " (student,page,copy,timestamp_manual)"
+              . " VALUES (?,?,?,?)"
         },
         CopyCreation => {
-            sql => "SELECT min(timestamp_auto) FROM $t_page WHERE student=? AND copy=?"
+            sql => "SELECT min(created_at) FROM $t_page WHERE student=? AND copy=?"
         },
         SetPageAuto => {
                 sql => "UPDATE $t_page"
@@ -519,7 +555,7 @@ sub define_statements {
               . " GROUP BY student,copy ORDER BY student,copy"
         },
         studentCopiesDate => {
-                sql => "SELECT student,copy,min(timestamp_auto) as creation FROM $t_page"
+                sql => "SELECT student,copy,min(created_at) as creation FROM $t_page"
               . " WHERE timestamp_auto>0 OR timestamp_manual>0"
               . " GROUP BY student,copy ORDER BY student,copy"
         },
@@ -947,7 +983,7 @@ sub set_page_manual {
           ->execute( $timestamp, $student, $page, $copy );
     } else {
         $self->statement('NEWPageManual')
-          ->execute( $student, $page, $copy, $timestamp, $timestamp );
+          ->execute( $student, $page, $copy, $timestamp );
     }
 }
 
