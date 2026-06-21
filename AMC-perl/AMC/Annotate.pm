@@ -1261,7 +1261,7 @@ sub process_student {
             $title .= __("Annotated paper");
             my $desc = "[" . studentids_string( $student->{student}, $student->{copy} ) . "]";
             $desc .= " " . $student->{'student.name'};
-            if($student->{'copy.version'} > 1) {
+            if($student->{'copy.version'} && $student->{'copy.version'} > 1) {
                 $desc .= " v" . $student->{'copy.version'};
             }
             $self->command("title $title");
