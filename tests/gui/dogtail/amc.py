@@ -420,6 +420,7 @@ class AMC:
         dialog.child('OK').click()
         # few sheets to print -> photocopy mode = No
         self.click_dialog(button="No")
+        time.sleep(1+len(copies))
         # return printed files
         printed_files = os.listdir(self.cups_pdf_dir)
         for f in printed_files:
