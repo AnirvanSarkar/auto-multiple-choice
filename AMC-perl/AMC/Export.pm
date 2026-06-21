@@ -308,7 +308,7 @@ sub pre_process {
     if($self->{'multiple.copies'}) {
         debug "Multiple copies detected!";
         @marks = sort {
-            $a->{'student.key'} cmp $b->{'student.key'} ||
+            ($a->{'student.key'} || '') cmp ($b->{'student.key'} || '') ||
                 $a->{creation} <=> $b->{creation}
             } @marks;
         my $v = 1;

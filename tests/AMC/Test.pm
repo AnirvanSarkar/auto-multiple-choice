@@ -63,6 +63,7 @@ my $defaults = {
     debug               => 0,
     debug_pixels        => 0,
     scans               => '',
+    scans_delay         => 0,
     seuil               => 0.5,
     seuil_up            => 1.0,
     bw_threshold        => 0.6,
@@ -447,6 +448,94 @@ sub prepare {
     $self->stop_clock("scoring strategy");
 }
 
+sub analyse_scans {
+    my ($self, $all_scans, %oo) = @_;
+    
+    my $scans_list = $self->{temp_dir} . "/scans-list.txt";
+    open( SL, ">", $scans_list ) or die "Open $scans_list: $!";
+    for (@$all_scans) { print SL "$_\n"; }
+    close(SL);
+
+    $self->start_clock();
+
+    $self->amc_command(
+        'read-pdfform',
+        '--list'     => $scans_list,
+        '--data'     => '%DATA',
+        '--password' => $self->{password},
+        ( $self->{multiple} ? '--multiple' : '--no-multiple' ),
+    );
+    
+    my @extract_opts = ();
+    if ( $self->{extract_with} =~ /^pdftk/ || $self->{force_magick} ) {
+        push @extract_opts, '--no-use-qpdf';
+    }
+    if ( $self->{extract_with} eq 'qpdf' || $self->{force_magick} ) {
+        push @extract_opts, '--no-use-pdftk';
+    }
+    if ( $self->{no_gs} ) {
+        push @extract_opts, '--no-use-gs';
+    }
+    $self->amc_command(
+        'getimages',
+        '--list'        => $scans_list,
+        '--copy-to'     => $self->{temp_dir} . "/scans",
+        '--orientation' => $self->get_orientation(),
+        '--password'    => $self->{password},
+        (
+            $self->{force_convert} || $self->{force_magick}
+            ? "--force-convert"
+            : "--no-force-convert"
+        ),
+        @extract_opts,
+    );
+
+    $self->{pre_allocate} = $oo{pre_allocate}
+      if ( exists( $oo{pre_allocate} ) );
+
+    $self->amc_command(
+        'analyse',
+        ( $self->{multiple} ? '--multiple' : '--no-multiple' ),
+        '--bw-threshold',
+        $self->{bw_threshold},
+        '--pre-allocate',
+        $self->{pre_allocate},
+        '--tol-marque',
+        $self->{tol_marque},
+        ( $self->{ignore_red} ? '--ignore-red' : '--no-ignore-red' ),
+        '--project-dir',
+        '%PROJ',
+        '--data',
+        '%DATA',
+        '--debug-image-dir',
+        '%PROJ/cr',
+        '--liste-fichiers',
+        $scans_list,
+    ) if ( $self->{debug} );
+    $self->amc_command(
+        'analyse',
+        ( $self->{multiple} ? '--multiple' : '--no-multiple' ),
+        '--bw-threshold',
+        $self->{bw_threshold},
+        '--pre-allocate',
+        $self->{pre_allocate},
+        '--tol-marque',
+        $self->{tol_marque},
+        ( $self->{ignore_red} ? '--ignore-red' : '--no-ignore-red' ),
+        (
+                 $self->{debug}
+              || $self->{debug_pixels} ? '--debug-pixels' : '--no-debug-pixels'
+        ),
+        '--project-dir',
+        '%PROJ', '--data', '%DATA',
+        '--liste-fichiers',
+        $scans_list,
+    );
+
+    $self->stop_clock("automatic data capture");
+
+}
+
 sub analyse {
     my ($self, %oo) = @_;
 
@@ -536,8 +625,7 @@ sub analyse {
 
     # prepares a file with the scans list
 
-    my $scans_list = $self->{temp_dir} . "/scans-list.txt";
-    open( SL, ">", $scans_list ) or die "Open $scans_list: $!";
+    my @all_scans = ();
     if ( $oo{directory} ) {
         opendir( my $dh, $self->{temp_dir} . "/" . $oo{directory} )
           || die "can't opendir $oo{directory}: $!";
@@ -547,95 +635,22 @@ sub analyse {
         if (@s) {
             $self->trace( "[I] " . @s . " scans from $oo{directory}" );
             for my $f (@s) {
-                print SL $self->{temp_dir} . "/"
-                  . $oo{directory} . "/"
-                  . $f . "\n";
+                push @all_scans,
+                  $self->{temp_dir} . "/" . $oo{directory} . "/" . $f;
             }
         }
     } else {
-        for ( @{ $self->{scans} } ) { print SL "$_\n"; }
+        @all_scans = @{ $self->{scans} };
     }
-    close(SL);
 
-    #
-
-    $self->start_clock();
-
-    $self->amc_command(
-        'read-pdfform',
-        '--list'     => $scans_list,
-        '--data'     => '%DATA',
-        '--password' => $self->{password},
-        ( $self->{multiple} ? '--multiple' : '--no-multiple' ),
-    );
-
-    my @extract_opts = ();
-    if ( $self->{extract_with} =~ /^pdftk/ || $self->{force_magick} ) {
-        push @extract_opts, '--no-use-qpdf';
+    if ( $self->{scans_delay} ) {
+        for my $file (@all_scans) {
+            $self->analyse_scans( [$file], %oo );
+            sleep( $self->{scans_delay} );
+        }
+    } else {
+        $self->analyse_scans( \@all_scans, %oo );
     }
-    if ( $self->{extract_with} eq 'qpdf' || $self->{force_magick} ) {
-        push @extract_opts, '--no-use-pdftk';
-    }
-    if ( $self->{no_gs} ) {
-        push @extract_opts, '--no-use-gs';
-    }
-    $self->amc_command(
-        'getimages',
-        '--list'        => $scans_list,
-        '--copy-to'     => $self->{temp_dir} . "/scans",
-        '--orientation' => $self->get_orientation(),
-        '--password'    => $self->{password},
-        (
-            $self->{force_convert} || $self->{force_magick}
-            ? "--force-convert"
-            : "--no-force-convert"
-        ),
-        @extract_opts,
-    );
-
-    $self->{pre_allocate} = $oo{pre_allocate}
-      if ( exists( $oo{pre_allocate} ) );
-
-    $self->amc_command(
-        'analyse',
-        ( $self->{multiple} ? '--multiple' : '--no-multiple' ),
-        '--bw-threshold',
-        $self->{bw_threshold},
-        '--pre-allocate',
-        $self->{pre_allocate},
-        '--tol-marque',
-        $self->{tol_marque},
-        ( $self->{ignore_red} ? '--ignore-red' : '--no-ignore-red' ),
-        '--project-dir',
-        '%PROJ',
-        '--data',
-        '%DATA',
-        '--debug-image-dir',
-        '%PROJ/cr',
-        '--liste-fichiers',
-        $scans_list,
-    ) if ( $self->{debug} );
-    $self->amc_command(
-        'analyse',
-        ( $self->{multiple} ? '--multiple' : '--no-multiple' ),
-        '--bw-threshold',
-        $self->{bw_threshold},
-        '--pre-allocate',
-        $self->{pre_allocate},
-        '--tol-marque',
-        $self->{tol_marque},
-        ( $self->{ignore_red} ? '--ignore-red' : '--no-ignore-red' ),
-        (
-                 $self->{debug}
-              || $self->{debug_pixels} ? '--debug-pixels' : '--no-debug-pixels'
-        ),
-        '--project-dir',
-        '%PROJ', '--data', '%DATA',
-        '--liste-fichiers',
-        $scans_list,
-    );
-
-    $self->stop_clock("automatic data capture");
 
 }
 

@@ -55,6 +55,7 @@ $t->set(
     n_copies     => 10,
     seuil        => 0.5,
     perfect_copy => '',
+    scans_delay  => 2,
     list         => 'students.csv',
     list_key     => 'id',
     code         => 'student.number',
@@ -68,6 +69,27 @@ $t->set(
         7 => 74,
         8 => 34,
     },
+    export_columns  => 'student.copy,student.key,student.name,copy.version',
+    export_full_csv => [
+        {
+            -copy     => 6,
+            -aname    => 'Jojo',
+            -question => "copy.version",
+            -score    => 1
+        },
+        {
+            -copy     => 8,
+            -aname    => 'Jojo',
+            -question => "copy.version",
+            -score    => 2
+        },
+        {
+            -copy     => 2,
+            -aname    => 'Jojo',
+            -question => "copy.version",
+            -score    => 3
+        },
+    ],
 );
 
 $t->setup();
