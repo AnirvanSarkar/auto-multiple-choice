@@ -178,26 +178,62 @@ our @ISA = ("AMC::DataModule");
 
 use_gettext();
 
+sub register_schemas {
+    my ($self) = @_;
+    $self->register_schema(
+        "page",
+        "src TEXT",
+        "student INTEGER",
+        "page INTEGER",
+        "copy INTEGER DEFAULT 0",
+        "timestamp_auto INTEGER DEFAULT 0",
+        "timestamp_manual INTEGER DEFAULT 0",
+        "a REAL",
+        "b REAL",
+        "c REAL",
+        "d REAL",
+        "e REAL",
+        "f REAL",
+        "mse REAL",
+        "layout_image TEXT",
+        "annotated TEXT",
+        "timestamp_annotate INTEGER",
+        "overwritten INTEGER DEFAULT 0",
+        "created_at INTEGER NOT NULL DEFAULT (unixepoch(current_timestamp))",
+        "PRIMARY KEY (student,page,copy)"
+    );
+    $self->register_schema(
+        "zone",
+        "zoneid INTEGER PRIMARY KEY",
+        "student INTEGER",
+        "page INTEGER",
+        "copy INTEGER",
+        "type INTEGER",
+        "id_a INTEGER",
+        "id_b INTEGER",
+        "total INTEGER DEFAULT -1",
+        "black INTEGER DEFAULT -1",
+        "manual REAL DEFAULT -1",
+        "image TEXT",
+        "imagedata BLOB"
+    );
+}
+
 sub version_current {
     return (6);
 }
 
 sub version_upgrade {
     my ( $self, $old_version ) = @_;
+
     if ( $old_version == 0 ) {
 
         # Upgrading from version 0 (empty database) to version 1 :
         # creates all the tables.
 
         debug "Creating capture tables...";
-        $self->sql_do( "CREATE TABLE IF NOT EXISTS "
-              . $self->table("page")
-              . " (src TEXT, student INTEGER, page INTEGER, copy INTEGER DEFAULT 0, timestamp_auto INTEGER DEFAULT 0, timestamp_manual INTEGER DEFAULT 0, a REAL, b REAL, c REAL, d REAL, e REAL, f REAL, mse REAL, layout_image TEXT, annotated TEXT, timestamp_annotate INTEGER, overwritten INTEGER DEFAULT 0, created_at INTEGER NOT NULL DEFAULT (unixepoch(current_timestamp)), PRIMARY KEY (student,page,copy))"
-        );
-        $self->sql_do( "CREATE TABLE IF NOT EXISTS "
-              . $self->table("zone")
-              . " (zoneid INTEGER PRIMARY KEY, student INTEGER, page INTEGER, copy INTEGER, type INTEGER, id_a INTEGER, id_b INTEGER, total INTEGER DEFAULT -1, black INTEGER DEFAULT -1, manual REAL DEFAULT -1, image TEXT, imagedata BLOB)"
-        );
+        $self->create_table("page");
+        $self->create_table("zone");
         $self->sql_do( "CREATE TABLE IF NOT EXISTS "
               . $self->table("position")
               . " (zoneid INTEGER, corner INTEGER, x REAL, y REAL, type INTEGER, PRIMARY KEY (zoneid,corner,type))"
@@ -222,9 +258,7 @@ sub version_upgrade {
         # Includes zoom files in the database
 
         debug "Including zoom files in the database...";
-        $self->sql_do( "ALTER TABLE "
-              . $self->table("zone")
-              . " ADD COLUMN imagedata BLOB" );
+        $self->add_column("zone", "imagedata");
 
         my $list = $self->get_image_paths(ZONE_BOX);
         my $nn   = 1 + $#{$list};
@@ -273,25 +307,10 @@ sub version_upgrade {
         $self->progression('end');
         return (4);
     } elsif ( $old_version == 4 ) {
-        $self->sql_do( "ALTER TABLE "
-              . $self->table("page")
-              . " ADD COLUMN overwritten INTEGER DEFAULT 0" );
+        $self->add_column("page", "overwritten");
         return (5);
     } elsif( $old_version == 5 ) {
-        $self->sql_do( "ALTER TABLE "
-              . $self->table("page")
-                       . " RENAME TO capture_pageold" );
-        $self->sql_do( "CREATE TABLE IF NOT EXISTS "
-              . $self->table("page")
-              . " (src TEXT, student INTEGER, page INTEGER, copy INTEGER DEFAULT 0, timestamp_auto INTEGER DEFAULT 0, timestamp_manual INTEGER DEFAULT 0, a REAL, b REAL, c REAL, d REAL, e REAL, f REAL, mse REAL, layout_image TEXT, annotated TEXT, timestamp_annotate INTEGER, overwritten INTEGER DEFAULT 0, created_at INTEGER NOT NULL DEFAULT (unixepoch(current_timestamp)), PRIMARY KEY (student,page,copy))"
-        );
-        my $cols =
-"src,student,page,copy,timestamp_auto,timestamp_manual,a,b,c,d,e,f,mse,layout_image,annotated,timestamp_annotate,overwritten";
-        $self->sql_do( " INSERT INTO "
-              . $self->table("page")
-              . " ($cols) SELECT $cols FROM "
-              . $self->table("pageold") );
-        $self->sql_do("DROP TABLE " . $self->table("pageold"));
+        $self->add_column_hard("page", "created_at");
         $self->sql_do( "UPDATE "
               . $self->table("page")
               . " SET created_at=timestamp_manual WHERE timestamp_manual>0"

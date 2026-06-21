@@ -45,6 +45,7 @@ sub new {
         statements      => {},
         immutable       => {},
         version_checked => 0,
+        schemas         => {},
     };
 
     for ( keys %oo ) {
@@ -57,6 +58,7 @@ sub new {
 
     bless( $self, $class );
 
+    $self->register_schemas;
     $self->define_statements;
 
     if ( !$self->{version_checked} ) {
@@ -430,6 +432,89 @@ sub clear_variables {
     }
 }
 
+sub register_schemas {
+}
+
+sub register_schema {
+    my ( $self, $table, @columns ) = @_;
+    $self->{schemas}->{$table} = [@columns];
+}
+
+sub get_table_col_schemas {
+    my ( $self, $table, %options ) = @_;
+    my @c = @{ $self->{schemas}->{$table} };
+    if ( $options{without} ) {
+        for my $r ( split( ";", $options{without} ) ) {
+            if($r) {
+                @c = grep { !/^$r(\s|$)/ } @c;
+            }
+        }
+    }
+    return @c;
+}
+
+sub get_table_schema {
+    my ( $self, $table, %options ) = @_;
+    my @c = $self->get_table_col_schemas($table, %options);
+    return "(" . join( ",", @c ) . ")";
+}
+
+sub get_table_cols {
+    my ( $self, $table, %options ) = @_;
+    my @c =
+      grep { /^[a-z]/ }
+      map  { s/\s.*//; $_; }
+      ( $self->get_table_col_schemas( $table, %options ) );
+    return join( ",", @c );
+}
+
+sub get_column_schema {
+    my ( $self, $table, $column ) = @_;
+    die "Missing schema for table $table!"
+      if ( !$self->{schemas}->{$table} );
+    my @sch = grep { /^$column / } @{ $self->{schemas}->{$table} };
+    die "Missing column schema for table=$table clumn=$column"
+      if ( !@sch );
+    return $sch[0];
+}
+
+sub create_table {
+    my ( $self, $table, %options ) = @_;
+    die "Missing schema for table $table!"
+      if ( !$self->{schemas}->{$table} );
+    $self->sql_do( "CREATE TABLE "
+                   . $self->table($table)
+                   . $self->get_table_schema($table), %options);
+}
+
+sub add_column {
+    my ( $self, $table, $column ) = @_;
+    my $sch = $self->get_column_schema($table, $column);
+    $self->sql_do(
+        "ALTER TABLE " . $self->table($table) . " ADD COLUMN $sch" );
+}
+
+sub add_column_hard {
+    my ( $self, $table, $column, %options ) = @_;
+    my $sch = $self->get_column_schema( $table, $column );
+    $self->sql_do( "ALTER TABLE "
+          . $self->table($table)
+          . " RENAME TO "
+          . $self->table( $table . "_old", "self" ) );
+    $self->create_table( $table, %options );
+    if ( $options{without} ) {
+        $options{without} .= ";$column";
+    } else {
+        $options{without} = $column;
+    }
+    my $cols = $self->get_table_cols( $table, %options );
+    $self->sql_do( "INSERT INTO "
+          . $self->table($table)
+          . " ($cols) SELECT $cols FROM "
+          . $self->table( $table . "_old" ) );
+    $self->sql_do( "DROP TABLE " . $self->table( $table . "_old" ) );
+}
+
 # version_check upgrades the module database to the last version.
 
 sub version_check {
@@ -479,10 +564,14 @@ sub version_check {
                   if ($vu);
             } while ($vu);
             $self->variable( 'version', $v );
+            if ( $v < $cv ) {
+                debug_and_stderr
+                  "WARNING: Database version ($v) could not be upgraded to $vu";
+            }
 
             $self->end_transaction('dbUG');
         } elsif ( $vu > $cv ) {
-            debug
+            debug_and_stderr
 "WARNING: Database version ($vu) is higher than module current version ($cv)";
         }
     } else {
