@@ -165,9 +165,9 @@ sub clean {
 sub setup {
     my ($self)=@_;
 
-    $self->{dir} =~ s:/[^/]*$:: if(-f $self->{dir});
-
     $self->{tmpdir} = tmpdir() if ( !$self->{tmpdir} );
+
+    $self->install;
 
     if ( !$self->{src} ) {
         opendir( my $dh, $self->{dir} )
@@ -182,14 +182,16 @@ sub setup {
           || die "can't opendir $self->{dir}: $!";
         my @l = grep { /\.(csv|txt)$/ } readdir($dh);
         closedir $dh;
-        $self->{list} = $l[0] || '';
+        my @csv = grep { /\.csv$/ } @l;
+        if(@csv) {
+            $self->{list} = $csv[0];
+        } else {
+            $self->{list} = $l[0] || '';
+        }
     }
     $self->{names} =
       AMC::NamesFile::new( $self->{dir} . '/' . $self->{list}, 'utf8', 'id' )
       if ( $self->{list} && -f $self->{dir} . '/' . $self->{list} );
-
-
-    $self->install;
 
     $self->{check_dir} = $self->{tmpdir} . "/AMC-VISUAL-TEST";
     mkdir( $self->{check_dir} ) if ( !-d $self->{check_dir} );
@@ -243,13 +245,23 @@ sub install {
         CLEANUP => ( !$self->{debug} )
     );
 
-    opendir( my $sh, $self->{dir} )
-      || die "can't opendir $self->{dir}: $!";
-    for my $f ( grep { !/^\./ } ( readdir($sh) ) ) {
-        system( "cp", "-r", $self->{dir} . '/' . $f, $self->{temp_dir} );
-    }
-    closedir $sh;
+    if ( $self->{dir} =~ /\.tgz$/ ) {
 
+        system("tar", "-C", $self->{temp_dir}, "-x", "-z", "-f", $self->{dir});
+        $self->{dir} = $self->{temp_dir};
+        
+    } else {
+
+        $self->{dir} =~ s:/[^/]*$:: if ( -f $self->{dir} );
+
+        opendir( my $sh, $self->{dir} )
+          || die "can't opendir $self->{dir}: $!";
+        for my $f ( grep { !/^\./ } ( readdir($sh) ) ) {
+            system( "cp", "-r", $self->{dir} . '/' . $f, $self->{temp_dir} );
+        }
+        closedir $sh;
+    }
+    
     for my $mv ( @{ $self->{move_files} } ) {
         debug("Move $mv->{from} to $mv->{to}");
         system(
