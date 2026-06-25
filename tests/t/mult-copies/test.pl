@@ -69,7 +69,7 @@ $t->set(
         7 => 74,
         8 => 34,
     },
-    export_columns  => 'student.copy,student.key,student.name,copy.version',
+    export_columns  => 'student.copy,student.key,student.name',
     export_full_csv => [
         {
             -copy     => 6,

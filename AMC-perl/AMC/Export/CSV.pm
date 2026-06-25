@@ -106,6 +106,8 @@ sub export {
 
     my @student_columns = split( /,+/, $self->{'out.columns'} );
 
+    push @student_columns, 'copy.version' if($self->{'multiple.copies'});
+
     my @columns = ();
 
     for my $c (@student_columns) {
@@ -115,6 +117,8 @@ sub export {
             push @columns, translate_column_title('nom');
         } elsif ( $c eq 'student.copy' ) {
             push @columns, translate_column_title('copie');
+        } elsif ( $c eq 'copy.version' ) {
+            push @columns, translate_column_title('version');
         } else {
             push @columns, encode( 'UTF-8', $c );
         }
