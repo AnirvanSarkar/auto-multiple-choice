@@ -79,7 +79,8 @@ sub dialog {
 
     my $students_store = Gtk3::ListStore->new(
         'Glib::String', 'Glib::String',  'Glib::String', 'Glib::String',
-        'Glib::String', 'Glib::Boolean', 'Glib::Boolean', 'Glib::String', 'Glib::String'
+        'Glib::String', 'Glib::Boolean', 'Glib::Boolean', 'Glib::String',
+        'Glib::String', 'Glib::String'
     );
 
     my $filtered = Gtk3::TreeModelFilter->new($students_store);
@@ -89,6 +90,7 @@ sub dialog {
     $filtered_sorted->set_sort_func( 0, \&sort_num,    0 );
     $filtered_sorted->set_sort_func( 1, \&sort_string, 1 );
     $filtered_sorted->set_sort_func( 7, \&sort_num,    7 );
+    $filtered_sorted->set_sort_func( 9, \&sort_num,    9 );
 
     $self->{students_list_store}           = $students_store;
     $self->{students_list_filtered}        = $filtered;
@@ -120,22 +122,19 @@ sub dialog {
     $column->set_sort_column_id(1);
     $self->get_ui('students_select_list')->append_column($column);
 
-    $column = Gtk3::TreeViewColumn->new_with_attributes(
-        __ "date",
-        $renderer,
-        text => 8
-    );
-    $column->set_sort_column_id(7);
-    $self->get_ui('students_select_list')->append_column($column);
-
     $self->{capture}->begin_read_transaction('gSLi');
     my $key            = $self->{association}->variable('key_in_list');
     my @selected_iters = ();
     my $i              = 0;
+    my %versions       = ();
+    my $mult_copies   = 0;
     for my $sc ( $self->{capture}->student_copies('Date') ) {
         my @student_copy = ( $sc->[0], $sc->[1] );
         my $creation_date = $sc->[2];
         my $id = $self->{association}->get_real(@student_copy);
+        my $version = ++$versions{$id};
+        $version = 1 if(!$id);
+        $mult_copies = 1 if($version > 1);
         my ($name) =
           $self->{students_list}->data( $key, $id, test_numeric => 1 );
         my $iter = $students_store->insert_with_values(
@@ -148,10 +147,29 @@ sub dialog {
             4 => ( $lk ? $name->{$lk} : '' ),
             7 => $creation_date,
             8 => $self->show_date($creation_date),
+            9 => $version,
         );
         push @selected_iters, $iter if ( $ids{ studentids_string(@student_copy) } );
     }
     $self->{capture}->end_transaction('gSLi');
+
+    if($mult_copies) {
+        $column = Gtk3::TreeViewColumn->new_with_attributes(
+            __ "version",
+            $renderer,
+            text => 9
+            );
+        $column->set_sort_column_id(9);
+        $self->get_ui('students_select_list')->append_column($column);
+    }
+
+    $column = Gtk3::TreeViewColumn->new_with_attributes(
+        __ "date",
+        $renderer,
+        text => 8
+    );
+    $column->set_sort_column_id(7);
+    $self->get_ui('students_select_list')->append_column($column);
 
     $self->get_ui('students_select_list')->get_selection->set_mode('multiple');
     for (@selected_iters) {

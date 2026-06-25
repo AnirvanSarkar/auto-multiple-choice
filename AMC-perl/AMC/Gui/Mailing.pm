@@ -37,11 +37,12 @@ use constant {
     ATTACHMENTS_NAME       => 1,
     ATTACHMENTS_FOREGROUND => 2,
 
-    EMAILS_SC     => 0,
-    EMAILS_NAME   => 1,
-    EMAILS_EMAIL  => 2,
-    EMAILS_ID     => 3,
-    EMAILS_STATUS => 4,
+    EMAILS_SC      => 0,
+    EMAILS_NAME    => 1,
+    EMAILS_EMAIL   => 2,
+    EMAILS_ID      => 3,
+    EMAILS_STATUS  => 4,
+    EMAILS_VERSION => 5,
 };
 
 use_gettext;
@@ -158,11 +159,75 @@ sub dialog {
     my $emails_list = $self->get_ui('emails_list');
     my $emails_store = Gtk3::ListStore->new(
         'Glib::String', 'Glib::String', 'Glib::String', 'Glib::String',
-        'Glib::String',
+        'Glib::String', 'Glib::String',
         );
     $self->{emails_store}=$emails_store;
     $emails_list->set_model($emails_store);
     $renderer = Gtk3::CellRendererText->new;
+
+    $self->{report}->begin_read_transaction('emCC');
+    if ( $self->{kind} == REPORT_ANNOTATED_PDF ) {
+        $self->{email_key} = $self->{association}->variable('key_in_list');
+        $self->{email_r} = $self->{report}->get_associated_type($self->{kind});
+    } else {
+        $self->{email_key} = $self->get('liste_key');
+        $self->{email_r} = $self->{report}->get_preassociated_type($self->{kind});
+    }
+
+    my $mult_copies = 0;
+    for my $i (@{$self->{email_r}}) {
+        my ($s) = $self->{students_list}
+        ->data( $self->{email_key}, $i->{id}, test_numeric => 1 );
+
+        my $current_id = '';
+        my $v = 1;
+
+        my @sc_list;
+        if ( $self->{kind} == REPORT_ANNOTATED_PDF ) {
+            @sc_list = $self->{association}->real_backs( $i->{id} );
+        } else {
+            @sc_list = [ ( $i->{student}, $i->{copy} ) ];
+        }
+        for my $sc ( @sc_list ) {
+            if($current_id && $current_id eq $i->{id}) {
+                $v += 1;
+            } else {
+                $current_id = $i->{id};
+                $v = 1;
+            }
+            $mult_copies = 1 if($v > 1);
+            my $name = $s->{_ID_};
+            $emails_store->set(
+                $emails_store->append,
+                EMAILS_ID,
+                $i->{id},
+                EMAILS_EMAIL,
+                '',
+                EMAILS_NAME,
+                $name,
+                EMAILS_VERSION,
+                $v,
+                EMAILS_SC,
+                (
+                    defined( $sc->[0] ) ? studentids_string(@$sc)
+                    : "[" . $i->{id} . "]"
+                ),
+                EMAILS_STATUS,
+                (
+                      $i->{mail_status} == REPORT_MAIL_OK     ? __("done")
+                    : $i->{mail_status} == REPORT_MAIL_FAILED ? __("failed")
+                    :                                           ""
+                ),
+            );
+        }
+    }
+    $self->{emails_failed} = [
+        map    { $_->{id} }
+          grep { $_->{mail_status} == REPORT_MAIL_FAILED }
+          (@{$self->{email_r}})
+    ];
+
+    $self->{report}->end_transaction('emCC');
 
     $column = Gtk3::TreeViewColumn->new_with_attributes(
         __(
@@ -190,6 +255,21 @@ sub dialog {
     $emails_list->append_column($column);
     $renderer = Gtk3::CellRendererText->new;
 
+    if($mult_copies) {
+        $column = Gtk3::TreeViewColumn->new_with_attributes(
+            __(
+                # TRANSLATORS: This is the title of a column containing students names
+                # in a table showing all annotated answer sheets, when sending them to
+                # the students by email.
+                "version"
+            ),
+            $renderer,
+            text => EMAILS_VERSION
+            );
+        $emails_list->append_column($column);
+        $renderer = Gtk3::CellRendererText->new;
+    }
+
     $column = Gtk3::TreeViewColumn->new_with_attributes(
         __(
           # TRANSLATORS: This is the title of a column containing students email
@@ -214,69 +294,6 @@ sub dialog {
         text => EMAILS_STATUS
     );
     $emails_list->append_column($column);
-
-    $self->{report}->begin_read_transaction('emCC');
-    if ( $self->{kind} == REPORT_ANNOTATED_PDF ) {
-        $self->{email_key} = $self->{association}->variable('key_in_list');
-        $self->{email_r} = $self->{report}->get_associated_type($self->{kind});
-    } else {
-        $self->{email_key} = $self->get('liste_key');
-        $self->{email_r} = $self->{report}->get_preassociated_type($self->{kind});
-    }
-
-    for my $i (@{$self->{email_r}}) {
-        my ($s) = $self->{students_list}
-        ->data( $self->{email_key}, $i->{id}, test_numeric => 1 );
-
-        my $current_id = '';
-        my $v = 1;
-
-        my @sc_list;
-        if ( $self->{kind} == REPORT_ANNOTATED_PDF ) {
-            @sc_list = $self->{association}->real_backs( $i->{id} );
-        } else {
-            @sc_list = [ ( $i->{student}, $i->{copy} ) ];
-        }
-        for my $sc ( @sc_list ) {
-            if($current_id && $current_id eq $i->{id}) {
-                $v += 1;
-            } else {
-                $current_id = $i->{id};
-                $v = 1;
-            }
-            my $name = $s->{_ID_};
-            if($v > 1) {
-                $name .= " (v$v)";
-            }
-            $emails_store->set(
-                $emails_store->append,
-                EMAILS_ID,
-                $i->{id},
-                EMAILS_EMAIL,
-                '',
-                EMAILS_NAME,
-                $name,
-                EMAILS_SC,
-                (
-                    defined( $sc->[0] ) ? studentids_string(@$sc)
-                    : "[" . $i->{id} . "]"
-                ),
-                EMAILS_STATUS,
-                (
-                      $i->{mail_status} == REPORT_MAIL_OK     ? __("done")
-                    : $i->{mail_status} == REPORT_MAIL_FAILED ? __("failed")
-                    :                                           ""
-                ),
-            );
-        }
-    }
-    $self->{emails_failed} = [
-        map    { $_->{id} }
-          grep { $_->{mail_status} == REPORT_MAIL_FAILED }
-          (@{$self->{email_r}})
-    ];
-
-    $self->{report}->end_transaction('emCC');
 
     $emails_list->get_selection->set_mode('multiple');
     $emails_list->get_selection->select_all;
