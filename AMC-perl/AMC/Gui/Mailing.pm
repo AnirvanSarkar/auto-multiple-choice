@@ -161,8 +161,18 @@ sub dialog {
         'Glib::String', 'Glib::String', 'Glib::String', 'Glib::String',
         'Glib::String', 'Glib::String',
         );
+    my $emails_sorted = Gtk3::TreeModelSort->new_with_model($emails_store);
+
+    $emails_sorted->set_sort_func( EMAILS_ID, \&sort_string, EMAILS_ID );
+    $emails_sorted->set_sort_func( EMAILS_NAME, \&sort_string, EMAILS_NAME );
+    $emails_sorted->set_sort_func( EMAILS_SC, \&sort_sc, EMAILS_SC );
+    $emails_sorted->set_sort_func( EMAILS_STATUS, \&sort_string, EMAILS_STATUS );
+    $emails_sorted->set_sort_func( EMAILS_EMAIL, \&sort_string, EMAILS_EMAIL );
+    $emails_sorted->set_sort_func( EMAILS_VERSION, \&sort_num, EMAILS_VERSION );
+    
     $self->{emails_store}=$emails_store;
-    $emails_list->set_model($emails_store);
+    $self->{emails_sorted}=$emails_sorted;
+    $emails_list->set_model($emails_sorted);
     $renderer = Gtk3::CellRendererText->new;
 
     $self->{report}->begin_read_transaction('emCC');
@@ -239,6 +249,7 @@ sub dialog {
         $renderer,
         text => EMAILS_SC
     );
+    $column->set_sort_column_id(EMAILS_SC);
     $emails_list->append_column($column);
     $renderer = Gtk3::CellRendererText->new;
 
@@ -252,6 +263,7 @@ sub dialog {
         $renderer,
         text => EMAILS_NAME
     );
+    $column->set_sort_column_id(EMAILS_NAME);
     $emails_list->append_column($column);
     $renderer = Gtk3::CellRendererText->new;
 
@@ -266,6 +278,7 @@ sub dialog {
             $renderer,
             text => EMAILS_VERSION
             );
+        $column->set_sort_column_id(EMAILS_VERSION);
         $emails_list->append_column($column);
         $renderer = Gtk3::CellRendererText->new;
     }
@@ -280,6 +293,7 @@ sub dialog {
         $renderer,
         text => EMAILS_EMAIL
     );
+    $column->set_sort_column_id(EMAILS_EMAIL);
     $emails_list->append_column($column);
     $renderer = Gtk3::CellRendererText->new;
 
@@ -293,6 +307,7 @@ sub dialog {
         $renderer,
         text => EMAILS_STATUS
     );
+    $column->set_sort_column_id(EMAILS_STATUS);
     $emails_list->append_column($column);
 
     $emails_list->get_selection->set_mode('multiple');
@@ -326,11 +341,11 @@ sub dialog {
         my @selected = $emails_list->get_selection->get_selected_rows;
         @selected = @{ $selected[0] };
         for my $i (@selected) {
-            my $iter = $emails_store->get_iter($i);
+            my $iter = $emails_sorted->get_iter($i);
             if ( $self->{kind} == REPORT_ANNOTATED_PDF ) {
-                push @ids, "copy(" . $emails_store->get( $iter, EMAILS_SC ) . ")";
+                push @ids, "copy(" . $emails_sorted->get( $iter, EMAILS_SC ) . ")";
             } else {
-                push @ids, $emails_store->get( $iter, EMAILS_ID );
+                push @ids, $emails_sorted->get( $iter, EMAILS_ID );
             }
         }
 

@@ -54,7 +54,7 @@ BEGIN {
     @ISA = qw(Exporter);
     @EXPORT =
       qw( &perl_module_search &amc_specdir &get_sty &file2id &id2idf &get_ep &get_epo
-          &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num
+          &get_epc &get_qr &file_triable &sort_from_columns &sort_string &sort_num &sort_sc
           &attention &model_id_to_iter &commande_accessible &system_debug &magick_module
           &use_gm_command &magick_perl_module &debug &debug_raw &debug_and_stderr
           &debug_pm_version &set_debug &get_debug &debug_file &use_gettext &clear_old
@@ -356,6 +356,26 @@ sub sort_num {
     $a = 0 if ( $a !~ /^-?[0-9.]+$/ );
     $b = 0 if ( $b !~ /^-?[0-9.]+$/ );
     return ( $parb <=> $para || $a <=> $b );
+}
+
+sub string2sc {
+    my ($s) = @_;
+    if ( !$s ) {
+        return ( 0, 0 );
+    } else {
+        if ( $s =~ /(.*):(.*)/ ) {
+            return ( $1, $2 );
+        } else {
+            return ( $s, 0 );
+        }
+    }
+}
+
+sub sort_sc {
+    my ( $liststore, $itera, $iterb, $sortkey ) = @_;
+    my @aa = string2sc($liststore->get( $itera, $sortkey ));
+    my @bb = string2sc($liststore->get( $iterb, $sortkey ));
+    return ( $aa[0] <=> $bb[0] || $aa[1] <=> $bb[1] );
 }
 
 sub sort_string {
