@@ -208,7 +208,7 @@ sub define_statements {
               . " ) WHERE real=?||''"
         },
         realBacks =>
-          { sql => "SELECT s.student,s.copy,min(c.timestamp_auto) AS creation "
+          { sql => "SELECT s.student,s.copy,min(c.created_at) AS creation "
               . " FROM ( SELECT CASE"
               . " WHEN manual IS NOT NULL THEN manual"
               . " ELSE auto END AS real, student, copy"
