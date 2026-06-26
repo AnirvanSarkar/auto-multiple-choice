@@ -184,52 +184,39 @@ sub dialog {
         $self->{email_r} = $self->{report}->get_preassociated_type($self->{kind});
     }
 
-    my $mult_copies = 0;
-    for my $i (@{$self->{email_r}}) {
+    my $versions = $self->{association}->versions(1);
+    my $mult_copies = %$versions ? 1 : 0;
+
+    for my $i ( @{ $self->{email_r} } ) {
         my ($s) = $self->{students_list}
-        ->data( $self->{email_key}, $i->{id}, test_numeric => 1 );
+          ->data( $self->{email_key}, $i->{id}, test_numeric => 1 );
 
-        my $current_id = '';
-        my $v = 1;
+        my $ids = studentids_string( $i->{student}, $i->{copy} );
+        my $v = $versions->{$ids} || 1;
 
-        my @sc_list;
-        if ( $self->{kind} == REPORT_ANNOTATED_PDF ) {
-            @sc_list = $self->{association}->real_backs( $i->{id} );
-        } else {
-            @sc_list = [ ( $i->{student}, $i->{copy} ) ];
-        }
-        for my $sc ( @sc_list ) {
-            if($current_id && $current_id eq $i->{id}) {
-                $v += 1;
-            } else {
-                $current_id = $i->{id};
-                $v = 1;
-            }
-            $mult_copies = 1 if($v > 1);
-            my $name = $s->{_ID_};
-            $emails_store->set(
-                $emails_store->append,
-                EMAILS_ID,
-                $i->{id},
-                EMAILS_EMAIL,
-                '',
-                EMAILS_NAME,
-                $name,
-                EMAILS_VERSION,
-                $v,
-                EMAILS_SC,
-                (
-                    defined( $sc->[0] ) ? studentids_string(@$sc)
-                    : "[" . $i->{id} . "]"
-                ),
-                EMAILS_STATUS,
-                (
-                      $i->{mail_status} == REPORT_MAIL_OK     ? __("done")
-                    : $i->{mail_status} == REPORT_MAIL_FAILED ? __("failed")
-                    :                                           ""
-                ),
-            );
-        }
+        my $name = $s->{_ID_};
+        $emails_store->set(
+            $emails_store->append,
+            EMAILS_ID,
+            $i->{id},
+            EMAILS_EMAIL,
+            '',
+            EMAILS_NAME,
+            $name,
+            EMAILS_VERSION,
+            $v,
+            EMAILS_SC,
+            (
+                defined( $i->{student} ) ? $ids
+                : "[" . $i->{id} . "]"
+            ),
+            EMAILS_STATUS,
+            (
+                  $i->{mail_status} == REPORT_MAIL_OK     ? __("done")
+                : $i->{mail_status} == REPORT_MAIL_FAILED ? __("failed")
+                :                                           ""
+            ),
+        );
     }
     $self->{emails_failed} = [
         map    { $_->{id} }

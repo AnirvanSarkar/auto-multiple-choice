@@ -576,7 +576,7 @@ sub define_statements {
         studentCopiesDate => {
                 sql => "SELECT student,copy,min(created_at) as creation FROM $t_page"
               . " WHERE timestamp_auto>0 OR timestamp_manual>0"
-              . " GROUP BY student,copy ORDER BY student,copy"
+              . " GROUP BY student,copy ORDER BY creation,student,copy"
         },
         maxCopy    => { sql => "SELECT MAX(copy) FROM $t_page" },
         maxAnswer  => { sql => "SELECT MAX(id_b) FROM $t_zone WHERE type=?" },

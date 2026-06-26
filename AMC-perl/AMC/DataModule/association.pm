@@ -226,6 +226,29 @@ sub define_statements {
               . " FROM $at"
               . " ) WHERE CAST(real AS INTEGER)=?"
         },
+        maxVersions => {
+            sql =>
+                "SELECT max(n) "
+                ." FROM ( SELECT count(*) AS n"
+                ."        FROM $at"
+                ."        GROUP BY CASE WHEN manual IS NOT NULL"
+                ."                 THEN manual ELSE auto END"
+                ."      )"
+        },
+        realOrder => {
+            sql =>
+                "SELECT a.student AS student,a.copy AS copy,d.creation AS creation,"
+                . " CASE WHEN a.manual IS NOT NULL"
+                . "           THEN a.manual ELSE a.auto END AS sid"
+                . " FROM"
+                . " $at AS a,"
+                . " (SELECT student,copy,min(created_at) as creation FROM ". $self->table("page", "capture")
+                . " WHERE timestamp_auto>0 OR timestamp_manual>0"
+                . " GROUP BY student,copy) AS d"
+                . " ON a.student=d.student AND a.copy=d.copy"
+                . " WHERE sid IS NOT NULL AND sid != ?"
+                . " ORDER BY sid,creation"
+        },
         counts => {
                 sql => "SELECT COUNT(auto),COUNT(manual),"
               . " SUM(CASE WHEN auto IS NOT NULL OR manual IS NOT NULL"
@@ -410,6 +433,41 @@ sub real_backs {
         $self->dbh->selectall_arrayref( $self->statement('realBacks'),
             {}, $code )
     };
+}
+
+# max_versions() returns the maximum of different versions of answer
+# sheets for each associated student.
+
+sub max_versions {
+    my ($self) = @_;
+    return $self->sql_single( $self->statement('maxVersions') );
+}
+
+# versions() returns a hashref giving the version number of all answer
+# sheets with version>1. The keys are the student:copy ids, and the
+# values are the version numbers.
+
+sub versions {
+    my ($self, $skip) = @_;
+
+    return {} if($skip && $self->max_versions()<=1);
+
+    $self->{data}->require_module('capture');
+    my $dates = $self->dbh->selectall_arrayref( $self->statement('realOrder'),
+        { Slice => {} }, 'NONE' );
+    my $vs          = {};
+    my $current_sid = '';
+    my $v           = 1;
+    for my $d (@$dates) {
+        if ( $current_sid && $current_sid eq $d->{sid} ) {
+            $v++;
+            $vs->{ studentids_string( $d->{student}, $d->{copy} ) } = $v;
+        } else {
+            $current_sid = $d->{sid};
+            $v           = 1;
+        }
+    }
+    return $vs;
 }
 
 # state($student,$copy) returns:

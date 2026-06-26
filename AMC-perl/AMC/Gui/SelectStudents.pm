@@ -126,15 +126,13 @@ sub dialog {
     my $key            = $self->{association}->variable('key_in_list');
     my @selected_iters = ();
     my $i              = 0;
-    my %versions       = ();
-    my $mult_copies   = 0;
+    my $versions       = $self->{association}->versions(1);
+    my $mult_copies    = %$versions ? 1 : 0;
     for my $sc ( $self->{capture}->student_copies('Date') ) {
         my @student_copy = ( $sc->[0], $sc->[1] );
         my $creation_date = $sc->[2];
         my $id = $self->{association}->get_real(@student_copy);
-        my $version = ++$versions{$id};
-        $version = 1 if(!$id);
-        $mult_copies = 1 if($version > 1);
+        my $version = $versions->{studentids_string(@student_copy)} || 1;
         my ($name) =
           $self->{students_list}->data( $key, $id, test_numeric => 1 );
         my $iter = $students_store->insert_with_values(

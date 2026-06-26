@@ -8,7 +8,12 @@ mkdir $HOME
 cp -r home/.* home/* $HOME
 echo "file://$HOME/AMC-tmp AMC-tmp" > $HOME/.config/gtk-3.0/bookmarks
 
-for t in test-*.py
+TESTS="$@"
+test "$TESTS" || TESTS=test-*.py
+
+echo $TESTS
+
+for t in $TESTS
 do
     echo
     echo "***************************************** $t"

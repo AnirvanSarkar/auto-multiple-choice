@@ -5,6 +5,7 @@ from shutil import copyfile, copytree, rmtree
 import csv
 import subprocess
 import time
+from pypdf import PdfReader
 
 os.system('gsettings set org.gnome.desktop.interface toolkit-accessibility true')
 
@@ -236,6 +237,20 @@ class AMC:
 
     def tab(self, tabname):
         return self.gui.child(tabname, roleName='page tab')
+
+    def cb_from_value(self, context, value):
+        x = context.child(value)
+        while x.roleName != 'combo box':
+            x = x.parent
+        return x
+
+    def cb_select(self, context, value):
+        cb = self.cb_from_value(context, value)
+        if cb.combovalue != value:
+            print(f"Select {value}")
+            cb.combovalue = value
+        else:
+            print(f"{value} already selected")
 
     def open_project(self, name, source_dir):
         self.project_name = name
@@ -659,6 +674,20 @@ class AMC:
         time.sleep(0.5)
         dialog.child('Quit').click()
 
+    def force_manual_association(self, sequence=[]):
+        marking = self.tab('Marking')
+        marking.select()
+        marking.child('Manual', roleName='button').click()
+        dialog = self.gui.child('Manual association')
+        dialog.set_size(1200,800)
+        for page,name in sequence:
+            time.sleep(0.5)
+            dialog.child(page).click()
+            time.sleep(0.5)
+            dialog.child(name).click()
+        time.sleep(0.5)
+        dialog.child('Quit').click()
+
     def report(self, output_format='OpenOffice', options_cb=[]):
         """Build the report, where output_format can be 'OpenOffice',
         'CSV', 'PDF list' (or other if plugins are installed)."""
@@ -723,30 +752,49 @@ class AMC:
         if len(missing) > 0:
             raise ValueError("Missing CSV line for "+", ".join(missing))
 
-    def check_annotated_files_exist(self, *files):
+    def check_annotated_files_exist(self, *files, attachments=False):
         errors = 0
+        if attachments:
+            base_dir = self.att_dir
+        else:
+            base_dir = self.project_dir() + '/cr/corrections/pdf'
+        base_dir += '/'
         for f in files:
-            if os.path.isfile(self.project_dir()
-                              + '/cr/corrections/pdf/' + f):
-                print("[Annotated] OK %s" % f)
+            subject = None
+            if isinstance(f, tuple) or isinstance(f, list):
+                subject = f[1]
+                f = f[0]
+            path = base_dir + f
+            if os.path.isfile(path):
+                if subject:
+                    reader = PdfReader(path)
+                    s = reader.metadata.subject
+                    if s != subject:
+                        print(f"[Annotated] PDF subject ? '{s}' instead of '{subject}' ({f})")
+                    else:
+                        print(f"[Annotated] OK {f} (subject = {s})")
+                else:
+                    print("[Annotated] OK %s" % f)
             else:
-                print("[Annotated] MISSING %s in %s" % (f, self.project_dir()))
+                print("[Annotated] MISSING %s in %s" % (f, base_dir))
                 errors += 1
         if errors > 0:
             raise ValueError("Some annotated answer sheets are missing.")
 
-    def annotate(self, model='(id)_(ID)'):
+    def annotate(self, model='(id)_(ID)', target='All students'):
         reports = self.gui.child('Reports', roleName='page tab')
         reports.select()
+        self.cb_select(reports, target)
         annotated = reports.child('Annotated papers', roleName='panel')
         annotated.child(roleName='text').text = model
         reports.child('Annotate papers', roleName='button').click()
-        time.sleep(4)
+        time.sleep(5)
 
     def set_options(self,
                     description=['TEST EXAM', 'test'],
                     printing_method = None,
-                    namefield = None):
+                    namefield = None,
+                    mail_store = None):
         namefield_change=False
         self.gui.child('Properties', roleName='button').click()
         dialog = self.gui.child('AMC Preferences')
@@ -787,11 +835,110 @@ class AMC:
             if nf[0][1].combovalue != namefield:
                 nf[0][1].combovalue = namefield
                 namefield_change=True
+        if mail_store:
+            time.sleep(1)
+            mailing = dialog.child('Email')
+            mailing.click()
+            time.sleep(1)
+            self.cb_select(mailing, 'sendmail')
+            entry = mailing.child('sendmail path'
+                                  ).parent.findChildren(
+                                      dogtail.predicate.GenericPredicate(
+                                          roleName='text'))
+            entry[0].text = self.project_dir() + '/' + 'store'
+
+            nf = sorted([(a.position[1], a)
+                         for a in mailing.child("Sender email").parent.findChildren(
+                                dogtail.predicate.GenericPredicate(
+                                    roleName='text'))])
+            nf[0][1].text = "test@auto-multiple-choice.net"
+            
         time.sleep(2)
         dialog.child('OK').click()
         time.sleep(2)
         if namefield_change:
             self.click_dialog()
+
+    def annotate_selected(self, nrows=None, sort_by=[], selected=[], tolx=5):
+        reports = self.gui.child('Reports', roleName='page tab')
+        reports.select()
+        self.cb_select(reports, 'Selected students')
+        time.sleep(0.2)
+        self.gui.child('Annotate papers').click()
+        time.sleep(2)
+
+        dialog = self.gui.child('Choose students')
+        tb = dialog.child(roleName='table')
+        self.table_sort(tb, sort_by)
+        headers, cells = self.table_check_nrows("Annotate", tb, nrows)
+        self.table_select_rows(headers, cells, selected)
+
+        dialog.child("OK").click()
+        time.sleep(1 + 0.5 * len(selected))
+
+    def table_sort(self, tb, sort_by):
+        headers = tb.findChildren(
+            dogtail.predicate.GenericPredicate(roleName='table column header'))
+        for t, n_clicks in sort_by: 
+            sh=[h for h in headers if h.name==t]
+            for _ in range(n_clicks):
+                sh[0].click()
+                time.sleep(0.5)
+
+    def table_check_nrows(self, name, tb, nrows):
+        headers = tb.findChildren(
+            dogtail.predicate.GenericPredicate(roleName='table column header'))
+        cells = tb.findChildren(
+            dogtail.predicate.GenericPredicate(roleName='table cell'))
+        nr = len(cells) // len(headers)
+        if nrows:
+            if nrows == nr:
+                print(f"[{name}] {nr} rows")
+            else:
+                raise ValueError(f"[{name}] {nr} rows, but should be {nrows}")
+        return headers, cells
+
+    def table_select_row(self, headers, cells, row):
+        hnames = list([h.name for h in headers])
+        for y in range(len(cells) // len(headers)):
+            ok = True
+            for k,v in row.items():
+                x = hnames.index(k)
+                if cells[y*len(headers)+x].name != str(v):
+                    ok = False
+            if ok:
+                cells[y*len(headers)].click()
+                return
+
+    def table_select_rows(self, headers, cells, rows):
+        for row in rows:
+            self.table_select_row(headers, cells, row)
+
+    def send_mail(self, nrows=None, sort_by=[], row={}, attachments=True):
+        reports = self.gui.child('Reports', roleName='page tab')
+        reports.select()
+        time.sleep(1)
+        reports.child("Send...").click()
+        time.sleep(1)
+        dialog = self.gui.child("Mailing")
+        dialog.set_size(1024, 600)
+        tb = dialog.child(roleName='table')
+        self.table_sort(tb, sort_by)
+        headers, cells = self.table_check_nrows("Mailing", tb, nrows)
+        self.table_select_row(headers, cells, row)
+        
+        dialog.child('Send').click()
+        time.sleep(5)
+
+        if attachments:
+            att_dir = self.project_dir() + '/attachments'
+            if not os.path.isdir(att_dir):
+                os.mkdir(att_dir)
+            self.att_dir = att_dir
+            subprocess.run(["munpack", "-C", att_dir,
+                            self.project_dir() + "/store.file"])
+        
+        self.click_dialog()
 
     def quit(self):
         self.gui.child('Close').click()
