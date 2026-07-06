@@ -1585,9 +1585,9 @@ along with Auto-Multiple-Choice.  If not, see
 }{}}%
 %    \end{macrocode}
 %
-% \DescribeMacro{\AMCstudentlabels} In some cases, some questions can
+% \DescribeMacro{\AMCrefs} In some cases, some questions can
 % be used or not depending on the student copy. The macro
-% |\AMCstudentlabels|\marg{macroname}\marg{questions IDs list} selects
+% |\AMCrefs|\marg{macroname}\marg{questions IDs list} selects
 % the used questions before passing the list to the command specified
 % as the first argument (for example |cref|, |cpageref| or other
 % variants).
@@ -1615,7 +1615,7 @@ along with Auto-Multiple-Choice.  If not, see
 
 \cs_generate_variant:Nn \amc_func_refs:Nn { cn }
 
-\cs_new_eq:NN \AMCstudentlabels \amc_func_refs:cn
+\cs_new_eq:NN \AMCrefs \amc_func_refs:cn
 
 \ExplSyntaxOff
 %    \end{macrocode}
