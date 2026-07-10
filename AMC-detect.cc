@@ -1,6 +1,6 @@
 /*
 
- Copyright (C) 2011-2025 Alexis Bienvenüe <paamc@passoire.fr>
+ Copyright (C) 2011-2026 Alexis Bienvenüe <paamc@passoire.fr>
 
  This file is part of Auto-Multiple-Choice
 
