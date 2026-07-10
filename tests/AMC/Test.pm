@@ -100,6 +100,7 @@ my $defaults = {
     blind               => 0,
     check_zooms         => {},
     check_subject       => '',
+    check_subject_content => '',            
     skip_prepare        => 0,
     skip_scans          => 0,
     tracedest           => \*STDERR,
@@ -458,6 +459,47 @@ sub prepare {
         '%PROJ/' . $self->{src},
     );
     $self->stop_clock("scoring strategy");
+}
+
+sub check_subject_content {
+    my ($self) = @_;
+    return if ( !$self->{check_subject_content} );
+    my @cmd = ( "pdf2txt", $self->{temp_dir} . "/DOC-sujet.pdf" );
+    open( TXT, "-|", @cmd ) or die "Unable to get PDF text: $!";
+    binmode TXT, ":utf8";
+    my $current_page = '';
+    my $look         = {};
+    my $found        = 0;
+    while (<TXT>) {
+        my $line = $_;
+        if ( $line =~ /\+([0-9]+\/[0-9]+)\/[0-9]+\+/ ) {
+            $current_page = $1;
+            $look         = $self->{check_subject_content}->{$current_page};
+            $look         = {} if ( !$look );
+        }
+        for my $k ( keys %$look ) {
+            if ( $line =~ /$k/ ) {
+                $found++ if ( $look->{$k} > 0 );
+                $look->{$k}--;
+            }
+        }
+    }
+    close(TXT);
+    my $missing = 0;
+    for my $page ( keys %{ $self->{check_subject_content} } ) {
+        my $p = $self->{check_subject_content}->{$page};
+        for my $k ( keys %$p ) {
+            if ( $p->{$k} != 0 ) {
+                $self->trace("[E] text not found (delta=$p->{$k}) on subject page $page: $k");
+                $missing++;
+            }
+        }
+    }
+    if ($missing) {
+        $self->failed(1);
+    } else {
+        $self->trace("[T] subject text: found $found");
+    }
 }
 
 sub analyse_scans {
@@ -1639,6 +1681,7 @@ sub default_process {
 
     $self->prepare       if ( !$self->{skip_prepare} );
     $self->check_subject if ( $self->{check_subject} );
+    $self->check_subject_content();
     $self->defects;
     $self->check_pages;
     if ( !$self->{skip_scans} ) {

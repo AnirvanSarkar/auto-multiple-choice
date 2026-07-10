@@ -1,0 +1,60 @@
+\documentclass[a4paper,french]{article}
+
+\usepackage{cmap}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[francais,bloc]{automultiplechoice}
+\usepackage{babel}
+\frenchsetup{ListItemsAsPar=true, AutoSpacePunctuation, ThinColonSpace, INGuillSpace, InnerGuillSingle, SuppressWarning}
+
+% à déclarer après babel et automultiplechoice
+\usepackage{cleveref}
+\usepackage{expl3}
+
+\begin{document}
+
+\setdefaultgroupmode{withoutreplacement}
+%%% préparation des groupes
+
+% Insertion des groupes qui peuvent s'écrire directement dans le fichier.
+% Pour simplifer le code l'inclusion est privilégiée.
+\input{elements-1.tex}
+
+%%% fabrication des copies
+
+\exemplaire{5}{
+
+%%% debut de l'en-tête des copies :
+
+\noindent{\bf QCM  \hfill TEST}
+\vspace*{.5cm}
+
+\hspace*{\fill}\champnom{\fbox{\begin{minipage}{.5\linewidth}
+Nom et prénom :
+
+\vspace*{.5cm}\namefielddots
+\vspace*{1mm}
+\end{minipage}}}
+\medskip
+
+\vspace{2ex}
+\noindent \textbf{Note  :}
+\begin{itemize}
+\item Les \AMCrefs{cref}{Paris,Cameroun,Loire,Rhin} font appel à vos connaissances en géographie.
+
+\item Pour l'histoire : Q. \AMCrefs{labelcref}{RF,Napoleon,armistice}, \AMCrefs{cpageref}{RF,Napoleon,armistice}.
+\end{itemize}
+\vspace{2ex}
+
+\noindent\hrulefill
+\vspace{4ex}
+
+\cleargroup{tout}
+\copygroup[3]{geographie}{tout}
+\copygroup[2]{histoire}{tout}
+\restituegroupe{tout}
+
+}
+
+\end{document}
